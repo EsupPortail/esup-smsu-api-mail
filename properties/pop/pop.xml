@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<beans 
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans-2.0.xsd 
+	http://www.springframework.org/schema/aop 
+	http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+	<bean id="popMessageRetrieverConnector"
+		class="org.esupportail.smsuapimail.services.messageRetriever.pop.PopMessageRetrieverConnector">
+		<property name="messageBodyToMailToSmsMessageConverter" ref="messageBodyToMailToSmsMessageConverter"/>
+		<property name="popServerAdress" value="${smsuapimail.pop.serverAddress}"/>
+		<property name="popServerLogin" value="${smsuapimail.pop.serverLogin}"/>
+		<property name="popServerPassword" value="${smsuapimail.pop.serverPassword}"/>
+		<property name="popFolderName" value="${smsuapimail.pop.folderName}"/>
+		<property name="mailCharset" value="${smsuapimail.pop.mailCharset}"/>  
+	</bean>
+	
+	<bean id="messageBodyToMailToSmsMessageConverter"
+		class="org.esupportail.smsuapimail.services.messageRetriever.pop.MessageBodyToMailToSmsMessageConverter">
+		<property name="recipientsTag" value="${smsuapimail.pop.recipientsTag}"/>
+		<property name="contentTag" value="${smsuapimail.pop.contentTag}"/>
+		<property name="accountTag" value="${smsuapimail.pop.accountTag}"/>
+		<property name="phoneNumerPattern" value="${smsuapimail.pop.phoneNumerPattern}"/>		
+	</bean>
+	
+</beans>

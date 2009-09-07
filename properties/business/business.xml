@@ -1,0 +1,19 @@
+<beans 
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd"
+	>
+	
+	<bean id="businessManager"
+		class="org.esupportail.smsuapimail.business.BusinessManager">
+		<property name="messageRetrieverConnector" ref="popMessageRetrieverConnector"/>
+		<property name="smsSender" ref="smsSenderWsImpl"/>
+		<property name="defaultAccountLabel">
+			<value>${smsuapimail.account.label}</value>
+		</property>
+		<property name="messageMaxLength">
+			<value>${smsuapimail.message.maxLength}</value>
+		</property>
+	</bean>
+	
+</beans>
