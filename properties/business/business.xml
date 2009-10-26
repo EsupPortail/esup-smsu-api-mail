@@ -14,6 +14,7 @@
 		<property name="messageMaxLength">
 			<value>${smsuapimail.message.maxLength}</value>
 		</property>
+		<property name="pwdListAsString" value="${smsuapimail.pwd.list}" />
 	</bean>
 	
 </beans>

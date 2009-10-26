@@ -80,7 +80,7 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 
 	/**
 	 * Get the message on the pop server.
-	 * @return
+	 * @return messageList
 	 * @throws MessageRetrieverConnectorException
 	 */
 	public List<SmsMessage> getMessages() throws MessageRetrieverConnectorException {
@@ -91,7 +91,7 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 	
 	/**
 	 * 
-	 * @return
+	 * @return a list of messages from the pop server
 	 * @throws MessageRetrieverConnectorException
 	 */
 	private List<SmsMessage> getEmailFromPopServer() throws MessageRetrieverConnectorException {
@@ -222,7 +222,7 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 	/**
 	 * 
 	 * @param email
-	 * @return
+	 * @return a Sms message from a mail
 	 * @throws IOException
 	 * @throws MessagingException
 	 */
@@ -238,7 +238,7 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 	/**
 	 * 
 	 * @param email
-	 * @return
+	 * @return a text from a message.
 	 * @throws IOException
 	 * @throws MessagingException
 	 */
@@ -328,7 +328,7 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 	
 	/**
 	 * Standard setter used by Spring.
-	 * @param charset
+	 * @param mailCharset 
 	 */
 	public void setMailCharset(final String mailCharset) {
 		this.mailCharset = mailCharset;

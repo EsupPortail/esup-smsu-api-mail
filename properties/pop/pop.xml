@@ -20,6 +20,7 @@
 	
 	<bean id="messageBodyToMailToSmsMessageConverter"
 		class="org.esupportail.smsuapimail.services.messageRetriever.pop.MessageBodyToMailToSmsMessageConverter">
+		<property name="pwdTag" value="${smsuapimail.pop.pwdTag}"/>
 		<property name="recipientsTag" value="${smsuapimail.pop.recipientsTag}"/>
 		<property name="contentTag" value="${smsuapimail.pop.contentTag}"/>
 		<property name="accountTag" value="${smsuapimail.pop.accountTag}"/>

@@ -30,41 +30,56 @@ public class MessageBodyToMailToSmsMessageConverter implements InitializingBean 
 	 */
 	private static final String SEPARATOR_CHAR = "=";
 	
-	
-	/**
-	 * Recipient index in message format result.
-	 */
-	private static final int MESSAGE_FORMAT_RECIPIENTS_IDX = 0;
-	
-	/**
-	 * Recipient pattenr for message format.
-	 */
-	private static final String MESSAGE_FORMAT_RECIPIENTS = "{0}";
-	
-	/**
-	 * Account index in message format result.
-	 */
-	private static final int MESSAGE_FORMAT_ACCOUNT_IDX = 1;
-	
-	/**
-	 * Account pattenr for message format.
-	 */
-	private static final String MESSAGE_FORMAT_ACCOUNT = "{1}";
-	
 	/**
 	 * Message index in message format result.
 	 */
-	private static final int MESSAGE_FORMAT_MESSAGE_IDX = 2;
+	private static final int MESSAGE_FORMAT_PWD_IDX = 0;
 	
 	/**
 	 * Message pattenr for message format.
 	 */
-	private static final String MESSAGE_FORMAT_MESSAGE = "{2}";
+	private static final String MESSAGE_FORMAT_PWD = "{0}";
+	
+	/**
+	 * Recipient index in message format result.
+	 */
+	private static final int MESSAGE_FORMAT_RECIPIENTS_IDX = 1;
+	
+	/**
+	 * Recipient pattenr for message format.
+	 */
+	private static final String MESSAGE_FORMAT_RECIPIENTS = "{1}";
+	
+	/**
+	 * Account index in message format result.
+	 */
+	private static final int MESSAGE_FORMAT_ACCOUNT_IDX = 2;
+	
+	/**
+	 * Account pattenr for message format.
+	 */
+	private static final String MESSAGE_FORMAT_ACCOUNT = "{2}";
+	
+	/**
+	 * Message index in message format result.
+	 */
+	private static final int MESSAGE_FORMAT_MESSAGE_IDX = 3;
+	
+	/**
+	 * Message pattenr for message format.
+	 */
+	private static final String MESSAGE_FORMAT_MESSAGE = "{3}";
+	
 	
 	/**
 	 * the separator comma used to separate phone number.
 	 */
 	private static final String COMMA_SEPARATOR_REGULAR_EXPR = ",";
+	
+	/**
+	 * Tag used in email to defined pwd.
+	 */
+	private String pwdTag;
 	
 	/**
 	 * Tag used in email to defined recipients.
@@ -98,7 +113,8 @@ public class MessageBodyToMailToSmsMessageConverter implements InitializingBean 
 	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
 	 */
 	public void afterPropertiesSet() {
-		messageFormater = new MessageFormat(recipientsTag + SEPARATOR_CHAR + MESSAGE_FORMAT_RECIPIENTS +
+		messageFormater = new MessageFormat(pwdTag + SEPARATOR_CHAR + MESSAGE_FORMAT_PWD +
+											recipientsTag + SEPARATOR_CHAR + MESSAGE_FORMAT_RECIPIENTS +
 											accountTag + SEPARATOR_CHAR + MESSAGE_FORMAT_ACCOUNT +
 											contentTag + SEPARATOR_CHAR + MESSAGE_FORMAT_MESSAGE);
 		
@@ -171,18 +187,22 @@ public class MessageBodyToMailToSmsMessageConverter implements InitializingBean 
 		}
 
 		if (result != null && result.length >= MESSAGE_FORMAT_MESSAGE_IDX) {
+			final String rawPwd = (String) result[MESSAGE_FORMAT_PWD_IDX];
 			final String rawRecipients = (String) result[MESSAGE_FORMAT_RECIPIENTS_IDX];
 			final String rawAccount = (String) result[MESSAGE_FORMAT_ACCOUNT_IDX];
 			final String rawMessage = (String) result[MESSAGE_FORMAT_MESSAGE_IDX];
 
+			final String pwd = getPwdFromString(rawPwd);
 			final List<String> recipients = getRecipientsFromString(rawRecipients);
 			final String account = getAccountFromString(rawAccount);
 			final String message = getMesssageFromString(rawMessage);
 			
 			retVal = new SmsMessage();
+			retVal.setPwd(pwd);
 			retVal.setPhoneNumbers(recipients);
 			retVal.setAccount(account);
 			retVal.setContent(message);
+			
 		} else {
 			final StringBuilder sb = new StringBuilder(200);
 			sb.append("The message body does not match with the pattern \n");
@@ -295,6 +315,30 @@ public class MessageBodyToMailToSmsMessageConverter implements InitializingBean 
 	}
 	
 	/**
+	 * extract a pwd.
+	 * @param pwdAsString
+	 * @return the pwd or null.
+	 */
+	private String getPwdFromString(final String pwdAsString) {
+		String retVal = null;
+		
+		String pwd = pwdAsString.trim();
+		pwd = removeCarriageReturn(pwd);
+		
+		if (pwd.length() > 0) {
+			retVal = pwd;
+		}
+		
+		if (logger.isDebugEnabled()) {
+			final StringBuilder sb = new StringBuilder(200);
+			sb.append("Return value for method getPwdFromString with line : ").append(pwdAsString);
+			sb.append("\n - return value : ").append(retVal);
+		}
+		
+		return retVal;
+
+	}
+	/**
 	 * remove carriage return in the specified string.
 	 * @param str
 	 * @return
@@ -334,5 +378,13 @@ public class MessageBodyToMailToSmsMessageConverter implements InitializingBean 
 	 */
 	public void setPhoneNumerPattern(final String phoneNumerPattern) {
 		this.phoneNumerPattern = phoneNumerPattern;
+	}
+	
+	/**
+	 * Standard setter used by spring.
+	 * @param pwdTag
+	 */
+	public void setPwdTag(final String pwdTag) {
+		this.pwdTag = pwdTag;
 	}
 }

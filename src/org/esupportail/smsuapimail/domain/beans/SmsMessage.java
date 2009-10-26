@@ -11,6 +11,8 @@ public class SmsMessage {
 	
 	private String account;
 	
+	private String pwd;
+	
 	public String getAccount() {
 		return account;
 	}
@@ -23,6 +25,10 @@ public class SmsMessage {
 		return phoneNumbers;
 	}
 
+	public String getPwd() {
+		return pwd;
+	}
+	
 	public void setPhoneNumbers(final List<String> phoneNumbers) {
 		this.phoneNumbers = phoneNumbers;
 	}
@@ -42,6 +48,10 @@ public class SmsMessage {
 
 	public void setContent(final String content) {
 		this.content = content;
+	}
+
+	public void setPwd(final String pwd) {
+		this.pwd = pwd;
 	}
 
 	
