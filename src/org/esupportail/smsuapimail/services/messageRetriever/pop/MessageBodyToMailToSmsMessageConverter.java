@@ -107,7 +107,10 @@ public class MessageBodyToMailToSmsMessageConverter implements InitializingBean 
 	private MessageFormat messageFormater;
 	
 	
-	
+	/**
+	 * message end tag
+	 */
+	private String endTag;
 	
 	/* (non-Javadoc)
 	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
@@ -170,8 +173,20 @@ public class MessageBodyToMailToSmsMessageConverter implements InitializingBean 
 		// /!\ Message format is not thread safe 
 		
 		synchronized (messageFormater) {
+			// search a mail signature
+			String messageBodyWithoutSignature;
+			
+			if (messageBody.indexOf(endTag) != -1){
+				messageBodyWithoutSignature = messageBody.substring(0, messageBody.indexOf(endTag));
+				if (logger.isDebugEnabled()) {
+					logger.debug("Signature removed : " + messageBody.substring(messageBody.indexOf(endTag)));
+				}
+			} else {
+				messageBodyWithoutSignature = messageBody;
+			}
 			// trim the body to avoid white spaces parsing problems
-			final String messageBodyTrimed  = messageBody.trim();
+			final String messageBodyTrimed  = messageBodyWithoutSignature.trim();
+			
 			result = messageFormater.parse(messageBodyTrimed, parsePosition);
 
 			// if error index != -1 => parsing error 
@@ -387,4 +402,13 @@ public class MessageBodyToMailToSmsMessageConverter implements InitializingBean 
 	public void setPwdTag(final String pwdTag) {
 		this.pwdTag = pwdTag;
 	}
+
+	/**
+	 * Standard setter used by spring.
+	 * @param endTag
+	 */
+	public void setEndTag(final String endTag) {
+		this.endTag = endTag;
+	}
+
 }

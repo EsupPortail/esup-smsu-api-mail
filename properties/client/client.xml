@@ -25,8 +25,8 @@
 	<bean id="smsSenderWsImpl"
 		class="org.esupportail.smsuapimail.services.smsSender.ws.SmsSenderWsImpl">
 		<property name="sendSms" ref="remoteSendSms"/>		
-		<property name="messageId">
-			<value type="java.lang.Integer">${smsuapimail.ws.messageId}</value>
+		<property name="fileName">
+			<value type="java.lang.String">${smsuapimail.ws.messageIdfileName}</value>
 		</property>
 		<property name="senderId">
 			<value type="java.lang.Integer">${smsuapimail.ws.senderId}</value>

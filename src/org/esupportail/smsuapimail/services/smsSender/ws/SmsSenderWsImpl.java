@@ -1,5 +1,14 @@
 package org.esupportail.smsuapimail.services.smsSender.ws;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.util.List;
 
 import org.esupportail.commons.services.logging.Logger;
@@ -28,6 +37,12 @@ public class SmsSenderWsImpl implements ISmsSender {
 	private ISendSms sendSms;
 
 	/**
+	 * a file to save and initialize the message ID
+	 */
+	private String fileName;
+
+
+	/**
 	 * Message id sent to the back office.
 	 */
 	private Integer messageId;
@@ -48,8 +63,16 @@ public class SmsSenderWsImpl implements ISmsSender {
 	private Integer serviceId;
 	
 
-	/* (non-Javadoc)
-	 * @see org.esupportail.smsuapimail.services.smsSender.ISmsSender#sendSms(java.util.List)
+	/**
+	 * Constructor
+	 */
+	public SmsSenderWsImpl() {
+		super();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @see org.esupportail.smsuapimail.services.smsSender.ISmsSender#sendSms(SmsMessage smsMessage)
 	 */
 	public void sendSms(final SmsMessage smsMessage) throws SmsSenderException {
 		
@@ -60,7 +83,8 @@ public class SmsSenderWsImpl implements ISmsSender {
 		final int nbSmsToSend = phoneNumbers.size();
 		
 		checkQuota(nbSmsToSend, accountLabel);
-		
+		messageId ++;
+		saveMessageId();
 		for (String phoneNumber : phoneNumbers) {
 			sendMessage(phoneNumber, message, accountLabel);
 		}
@@ -127,19 +151,28 @@ public class SmsSenderWsImpl implements ISmsSender {
 	}
 	
 	/**
+	 * save the current messageID in a file.
+	 */
+	private void saveMessageId() {
+		PrintWriter pw;
+	    
+		try {
+			pw =  new PrintWriter(new BufferedWriter
+			   (new FileWriter(fileName)));
+			pw.println(messageId);
+			pw.close();
+		} catch (IOException e) {
+			logger.warn("Enable to save messageId to file " + fileName, e);
+		}
+	}
+	
+	
+	/**
 	 * Standard setter used by Spring.
 	 * @param sendSms
 	 */
 	public void setSendSms(final ISendSms sendSms) {
 		this.sendSms = sendSms;
-	}
-
-	/**
-	 * Standard setter used by Spring.
-	 * @param messageId
-	 */
-	public void setMessageId(final Integer messageId) {
-		this.messageId = messageId;
 	}
 
 
@@ -167,5 +200,49 @@ public class SmsSenderWsImpl implements ISmsSender {
 	 */
 	public void setServiceId(final Integer serviceId) {
 		this.serviceId = serviceId;
+	}
+	
+	/**
+	 * Standard setter used by Spring.
+	 * @param fileName
+	 */
+	public void setFileName(final String fileName) {
+		this.fileName = fileName;
+		try {
+			File ips=new File(fileName);
+			InputStreamReader ipsr=new FileReader(ips);
+			BufferedReader br=new BufferedReader(ipsr);
+			String ligne;
+			ligne=br.readLine();
+			if (ligne == null){
+				messageId = 1;
+				saveMessageId();
+			} else {
+				try {
+					messageId = Integer.valueOf(ligne);
+				} catch (NumberFormatException e) {
+					messageId = 1;
+					saveMessageId();
+				}
+			}
+			br.close();
+			} catch (FileNotFoundException e) {
+				messageId = 1;
+				saveMessageId();
+			} catch (IOException e) {
+				messageId = 1;
+				saveMessageId();
+			}
+			
+			
+			
+			if (logger.isDebugEnabled()) {
+				StringBuffer sb = new StringBuffer();
+				sb.append("MessageId initialised with value : [");
+				sb.append(messageId);
+				sb.append("]");
+				logger.debug(sb.toString());
+			}
+
 	}
 }

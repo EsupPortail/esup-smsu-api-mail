@@ -12,7 +12,7 @@ public interface ISmsSender {
 	
 	/**
 	 * Send SMS to the back office.
-	 * @param mailToSmsMessageList
+	 * @param smsMessage 
 	 * @throws SmsSenderException
 	 */
 	void sendSms(SmsMessage smsMessage) throws SmsSenderException; 

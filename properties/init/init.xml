@@ -14,7 +14,7 @@
 
 	<bean 
 		id="versionningService"
-		class="org.esupportail.smsuapimail.services.application.VersionningServiceImpl"
+		class="org.esupportail.smsuapimail.services.application.VoidVersionningServiceImpl"
 		parent="abstractDomainAwareBean"
 		>
 		<property name="firstAdministratorId" value="${init.firstAdministratorId}" />
