@@ -262,6 +262,7 @@ public class MessageBodyToMailToSmsMessageConverter implements InitializingBean 
 		}
 		
 		if (logger.isDebugEnabled()) {
+			@SuppressWarnings("unused")
 			final String s = 
 			    "Return value for method getRecipientsFromStringWithTag with line : " + recipientsAsString + 
 			    "\n - return value : " + retVal;
@@ -312,6 +313,7 @@ public class MessageBodyToMailToSmsMessageConverter implements InitializingBean 
 		}
 					
 		if (logger.isDebugEnabled()) {
+			@SuppressWarnings("unused")
 			final String s = 
 			    "Return value for method getMesssageFromString with line : " + messageAsString + 
 			    "\n - return value : " + retVal;
@@ -336,6 +338,7 @@ public class MessageBodyToMailToSmsMessageConverter implements InitializingBean 
 		}
 		
 		if (logger.isDebugEnabled()) {
+			@SuppressWarnings("unused")
 			final String s =
 			    "Return value for method getPwdFromString with line : " + pwdAsString + 
 			    "\n - return value : " + retVal;

@@ -9,6 +9,7 @@ package org.esupportail.smsuapimail.services.exceptionHandling;
  * 
  * See /properties/exceptionHandling/exceptionHandling-example.xml.
  */
+@SuppressWarnings("serial")
 public class CachingEmailExceptionServiceFactoryImpl 
 extends org.esupportail.commons.services.exceptionHandling.CachingEmailExceptionServiceFactoryImpl {
 	
