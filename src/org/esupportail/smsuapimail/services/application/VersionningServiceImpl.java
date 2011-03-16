@@ -190,7 +190,7 @@ public class VersionningServiceImpl extends AbstractDomainAwareBean implements V
 		}
 		printOlderThanMessage(version);
 		String methodName = "upgrade" + version.replace('.', 'd');
-		Class [] methodArgs = new Class [] {};
+		Class<?> [] methodArgs = new Class [] {};
 		Method method;
 		try {
 			method = getClass().getMethod(methodName, methodArgs);
