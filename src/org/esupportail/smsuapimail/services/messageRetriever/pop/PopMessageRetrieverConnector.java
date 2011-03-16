@@ -108,12 +108,10 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 			
 			// Connect to the pop server
 			if (logger.isDebugEnabled()) {
-				final StringBuilder sb = new StringBuilder(200);
-				sb.append("Connecting to pop serveur : \n");
-				sb.append(" - server address : ").append(popServerAdress).append("\n");
-				sb.append(" - server login : ").append(popServerLogin).append("\n");
-				sb.append(" - server pass : ").append("password is hidden").append("\n");
-				logger.debug(sb.toString());
+				logger.debug("Connecting to pop serveur : \n" + 
+					     " - server address : " + popServerAdress + "\n" +
+					     " - server login : " + popServerLogin + "\n" + 
+					     " - server pass : " + "password is hidden" + "\n");
 			}
 			
 			store = session.getStore(POP_STORE_TYPE);
@@ -122,20 +120,17 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 			// Go to the default folder
 			defaultFolder = store.getDefaultFolder();
 			if (defaultFolder == null) {
-				final StringBuilder sb = new StringBuilder(200);
-				sb.append("unable to get default folder on server : ").append(popServerAdress);
-				logger.error(sb.toString());
-				throw new MessageRetrieverConnectorException(sb.toString());
+				String s = "unable to get default folder on server : " + popServerAdress;
+				logger.error(s);
+				throw new MessageRetrieverConnectorException(s);
 			}
 			
 			// Go to the folder containing email
 			folder = defaultFolder.getFolder(popFolderName);
 			if (folder == null) {
-				final StringBuilder sb = new StringBuilder(200);
-				sb.append("unable to get folder : ").append(popFolderName);
-				sb.append(" on server : ").append(popServerAdress);
-				logger.error(sb.toString());
-				throw new MessageRetrieverConnectorException(sb.toString());
+				String s = "unable to get folder : " + popFolderName + " on server : " + popServerAdress;
+				logger.error(s);
+				throw new MessageRetrieverConnectorException(s);
 			}
 			// Open the folder for read and write (write right must be present to allow delete)
 			folder.open(Folder.READ_WRITE);
@@ -158,15 +153,9 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 					}
 					
 				} catch (MessagingException e) {
-					final StringBuilder sb = new StringBuilder(200);
-					sb.append("Unable to manage email with subject : ").append(messageTmp.getSubject());
-					sb.append(" due to MessagingException");
-					logger.error(sb.toString(), e);
+					logger.error("Unable to manage email with subject : " + messageTmp.getSubject() + " due to MessagingException", e);
 				} catch (IOException e) {
-					final StringBuilder sb = new StringBuilder(200);
-					sb.append("Unable to manage email with subject : ").append(messageTmp.getSubject());
-					sb.append(" due to IOException");
-					logger.error(sb.toString(), e);
+					logger.error("Unable to manage email with subject : " + messageTmp.getSubject() + " due to IOException", e);
 				} finally {
 					// whetever append mark delete the message
 					messageTmp.setFlag(Flags.Flag.DELETED, true);
@@ -175,15 +164,13 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 
 			
 		} catch (NoSuchProviderException e) {
-			final StringBuilder sb = new StringBuilder(200);
-			sb.append("unable to get message (due to NoSuchProviderException) from server : ").append(popServerAdress);
-			logger.error(sb.toString(), e);
-			throw new MessageRetrieverConnectorException(sb.toString(), e);
+			String s = "unable to get message (due to NoSuchProviderException) from server : " + popServerAdress;
+			logger.error(s, e);
+			throw new MessageRetrieverConnectorException(s, e);
 		} catch (MessagingException e) {
-			final StringBuilder sb = new StringBuilder(200);
-			sb.append("unable to get message (due to MessagingException) from server : ").append(popServerAdress);
-			logger.error(sb.toString(), e);
-			throw new MessageRetrieverConnectorException(sb.toString(), e);
+			String s = "unable to get message (due to MessagingException) from server : " + popServerAdress;
+			logger.error(s, e);
+			throw new MessageRetrieverConnectorException(s, e);
 		} finally {
 	    	// close the folder
 			try {
@@ -192,10 +179,8 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 					folder.close(true);
 				}
 			} catch (MessagingException e) {
-				final StringBuilder sb = new StringBuilder(200);
-				sb.append("Unable to close folder : ").append(popFolderName);
-				sb.append(" on server : ").append(popServerAdress);
-				logger.warn(sb.toString(), e);
+				logger.warn("Unable to close folder : " + popFolderName + 
+					    " on server : " + popServerAdress, e);
 			}
 				
 			try {
@@ -203,17 +188,12 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 					store.close();
 				}
 			} catch (MessagingException e) {
-				final StringBuilder sb = new StringBuilder(200);
-				sb.append("Unable to get close the store");
-				sb.append(" on server : ").append(popServerAdress);
-				logger.warn(sb.toString(), e);
+				logger.warn("Unable to get close the store" + " on server : " + popServerAdress, e);
 			}
 		}
 		
 		if (logger.isDebugEnabled()) {
-			final StringBuilder sb = new StringBuilder(200);
-			sb.append("Found ").append(messageToProcessList.size()).append(" emails to proceed");
-			logger.debug(sb.toString());
+			logger.debug("Found " + messageToProcessList.size() + " emails to proceed");
 		}
 		
 		return messageToProcessList;
@@ -268,18 +248,14 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 				currentLine = reader.readLine();
 			}
 		} else {
-			final StringBuilder sb = new StringBuilder(200);
-			sb.append("Message with subject : ").append(email.getSubject());
-			sb.append(" rejected because it is not a plain/text email");
-			logger.error(sb.toString());
-			throw new MessagingException(sb.toString());
+			String s = "Message with subject : " + email.getSubject() + 
+			    " rejected because it is not a plain/text email";
+			logger.error(s);
+			throw new MessagingException(s);
 		}
 		
 		if (logger.isDebugEnabled()) {
-			final StringBuilder sb = new StringBuilder(400);
-			sb.append("Text extract from message is : \n");
-			sb.append(retVal.toString());
-			logger.debug(sb.toString());
+			logger.debug("Text extract from message is : \n" + retVal.toString());
 		}
 		
 		return retVal.toString();

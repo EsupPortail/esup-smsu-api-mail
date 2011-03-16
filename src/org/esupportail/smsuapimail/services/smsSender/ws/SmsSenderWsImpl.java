@@ -103,26 +103,22 @@ public class SmsSenderWsImpl implements ISmsSender {
 		try {
 			
 			if (logger.isDebugEnabled()) {
-				final StringBuilder sb = new StringBuilder(200);
-				sb.append("Sending request isQuotaOk to back office with parameters : \n");
-				sb.append(" - Nb of SMS : ").append(nbSmsToSend).append("\n");
-				sb.append(" - Account label : ").append(accountLabel);
-				logger.debug(sb.toString());
+				logger.debug("Sending request isQuotaOk to back office with parameters : \n" + 
+					     " - Nb of SMS : " + nbSmsToSend + "\n" + 
+					     " - Account label : " + accountLabel);
 			}
 			
 			sendSms.isQuotaOk(nbSmsToSend, accountLabel);
 			
 		} catch (UnknownIdentifierApplicationException e) {
-			final StringBuilder sb = new StringBuilder(200);
-			sb.append("Unable to send SMS to back office due to identification problem");
-			logger.error(sb.toString(), e);
-			throw new SmsSenderException(sb.toString(), e);
+			String s = "Unable to send SMS to back office due to identification problem";
+			logger.error(s, e);
+			throw new SmsSenderException(s, e);
 
 		} catch (InsufficientQuotaException e) {
-			final StringBuilder sb = new StringBuilder(200);
-			sb.append("Unable to send SMS to back office due to quota problem");
-			logger.error(sb.toString(), e);
-			throw new SmsSenderException(sb.toString(), e);
+			String s = "Unable to send SMS to back office due to quota problem";
+			logger.error(s, e);
+			throw new SmsSenderException(s, e);
 		}
 	}
 	
@@ -135,16 +131,14 @@ public class SmsSenderWsImpl implements ISmsSender {
 	private void sendMessage(final String phoneNumber, final String content, final String accountLabel) {
 		
 		if (logger.isDebugEnabled()) {
-			final StringBuilder sb = new StringBuilder(200);
-			sb.append("Sending request sendSMS to back office with parameters : \n");
-			sb.append(" - Message id : ").append(messageId).append("\n");
-			sb.append(" - Sender id : ").append(senderId).append("\n");
-			sb.append(" - Group sender id : ").append(groupSenderId).append("\n");
-			sb.append(" - Service id : ").append(serviceId).append("\n");
-			sb.append(" - Phone number : ").append(phoneNumber).append("\n");
-			sb.append(" - Account label : ").append(accountLabel).append("\n");
-			sb.append(" - content : ").append(content);
-			logger.debug(sb.toString());
+			logger.debug("Sending request sendSMS to back office with parameters : \n" + 
+				     " - Message id : " + messageId + "\n" + 
+				     " - Sender id : " + senderId + "\n" + 
+				     " - Group sender id : " + groupSenderId + "\n" + 
+				     " - Service id : " + serviceId + "\n" + 
+				     " - Phone number : " + phoneNumber + "\n" + 
+				     " - Account label : " + accountLabel + "\n" + 
+				     " - content : " + content);
 		}
 		
 		sendSms.sendSMS(messageId, senderId, groupSenderId, serviceId, phoneNumber, accountLabel, content);
@@ -237,11 +231,7 @@ public class SmsSenderWsImpl implements ISmsSender {
 			
 			
 			if (logger.isDebugEnabled()) {
-				StringBuffer sb = new StringBuffer();
-				sb.append("MessageId initialised with value : [");
-				sb.append(messageId);
-				sb.append("]");
-				logger.debug(sb.toString());
+				logger.debug("MessageId initialised with value : [" + messageId + "]");
 			}
 
 	}

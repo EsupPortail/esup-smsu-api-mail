@@ -136,21 +136,19 @@ public class MessageBodyToMailToSmsMessageConverter implements InitializingBean 
 		
 		// if no recipient found : error
 		if (recipients == null || recipients.size() == 0) {
-			final StringBuilder sb = new StringBuilder(200);
-			sb.append("No recipient found in message : \n");
-			sb.append(" - message : ").append(messageBody);
-			logger.error(sb.toString());
-			throw new MessagingException(sb.toString());
+			final String s = 
+			    "No recipient found in message : \n" +
+			    " - message : " + messageBody;
+			logger.error(s);
+			throw new MessagingException(s);
 		}
 		
 		
 		if (logger.isDebugEnabled()) {
-			final StringBuilder sb = new StringBuilder(200);
-			sb.append("convertMessageBodyToMailToSmsMessage return value : \n");
-			sb.append(" - recipient list : ").append(recipients).append("\n");
-			sb.append(" - account : ").append(smsMessage.getAccount()).append("\n");
-			sb.append(" - content : ").append(smsMessage.getContent()).append("\n");
-			logger.debug(sb.toString());
+			logger.debug("convertMessageBodyToMailToSmsMessage return value : \n" + 
+				     " - recipient list : " + recipients + "\n" + 
+				     " - account : " + smsMessage.getAccount() + "\n" + 
+				     " - content : " + smsMessage.getContent() + "\n");
 		}
 		
 		return smsMessage;
@@ -191,13 +189,12 @@ public class MessageBodyToMailToSmsMessageConverter implements InitializingBean 
 
 			// if error index != -1 => parsing error 
 			if (parsePosition.getErrorIndex() != -1) {
-				final StringBuilder sb = new StringBuilder(200);
-				sb.append("The message body does not match with the pattern \n");
-				sb.append(" - message body : [").append(messageBodyTrimed).append("]\n");
-				sb.append(" - pattern : [").append(messageBody).append(messageFormater.toPattern()).append("]\n");
-				sb.append(" - Parse index error is : ").append(parsePosition.getErrorIndex());
-				logger.error(sb.toString());
-				throw new MessagingException(sb.toString());
+				String s = "The message body does not match with the pattern \n" + 
+				    " - message body : [" + messageBodyTrimed + "]\n" + 
+				    " - pattern : [" + messageBody + messageFormater.toPattern() + "]\n" + 
+				    " - Parse index error is : " + parsePosition.getErrorIndex();
+				logger.error(s);
+				throw new MessagingException(s);
 			}
 		}
 
@@ -219,11 +216,11 @@ public class MessageBodyToMailToSmsMessageConverter implements InitializingBean 
 			retVal.setContent(message);
 			
 		} else {
-			final StringBuilder sb = new StringBuilder(200);
-			sb.append("The message body does not match with the pattern \n");
-			sb.append(" - message body : ").append(messageBody);
-			logger.error(sb.toString());
-			throw new MessagingException(sb.toString());
+			final String s = 
+			    "The message body does not match with the pattern \n" + 
+			    " - message body : " + messageBody;
+			logger.error(s);
+			throw new MessagingException(s);
 		}
 		
 		return retVal;		
@@ -239,9 +236,7 @@ public class MessageBodyToMailToSmsMessageConverter implements InitializingBean 
 		
 		
 		if (logger.isDebugEnabled()) {
-			final StringBuilder sb = new StringBuilder(200);
-			sb.append("Start parsing line : ").append(recipientsAsString);
-			logger.debug(sb.toString());
+			logger.debug("Start parsing line : " + recipientsAsString);
 		}
 
 		final String tmpRecipientAsString = removeCarriageReturn(recipientsAsString);
@@ -257,23 +252,19 @@ public class MessageBodyToMailToSmsMessageConverter implements InitializingBean 
 			if (isValidPhoneNumberFormat) {
 				retVal.add(tmpPhoneNumber);
 				if (logger.isDebugEnabled()) {
-					final StringBuilder sb = new StringBuilder(200);
-					sb.append("Valid recipient phone number found : ").append(tmpPhoneNumber);
-					logger.debug(sb.toString());
+					logger.debug("Valid recipient phone number found : " + tmpPhoneNumber);
 				}
 			} else {
-				final StringBuilder sb = new StringBuilder(200);
-				sb.append("InValid recipient phone number found : ").append(tmpPhoneNumber).append("\n");
-				sb.append("The phone number is rejected");
-				logger.warn(sb.toString());
+				logger.warn("InValid recipient phone number found : " + tmpPhoneNumber + "\n" + 
+					    "The phone number is rejected");
 			}
 
 		}
 		
 		if (logger.isDebugEnabled()) {
-			final StringBuilder sb = new StringBuilder(200);
-			sb.append("Return value for method getRecipientsFromStringWithTag with line : ").append(recipientsAsString);
-			sb.append("\n - return value : ").append(retVal);
+			final String s = 
+			    "Return value for method getRecipientsFromStringWithTag with line : " + recipientsAsString + 
+			    "\n - return value : " + retVal;
 		}
 		
 		return retVal;
@@ -297,8 +288,8 @@ public class MessageBodyToMailToSmsMessageConverter implements InitializingBean 
 					
 		if (logger.isDebugEnabled()) {
 			final StringBuilder sb = new StringBuilder(200);
-			sb.append("Return value for method getAccountFromStringWithTag with line : ").append(accountAsString);
-			sb.append("\n - return value : ").append(retVal);
+			sb.append("Return value for method getAccountFromStringWithTag with line : " + accountAsString);
+			sb.append("\n - return value : " + retVal);
 		}
 		
 		return retVal;
@@ -321,9 +312,9 @@ public class MessageBodyToMailToSmsMessageConverter implements InitializingBean 
 		}
 					
 		if (logger.isDebugEnabled()) {
-			final StringBuilder sb = new StringBuilder(200);
-			sb.append("Return value for method getMesssageFromString with line : ").append(messageAsString);
-			sb.append("\n - return value : ").append(retVal);
+			final String s = 
+			    "Return value for method getMesssageFromString with line : " + messageAsString + 
+			    "\n - return value : " + retVal;
 		}
 		
 		return retVal;
@@ -345,9 +336,9 @@ public class MessageBodyToMailToSmsMessageConverter implements InitializingBean 
 		}
 		
 		if (logger.isDebugEnabled()) {
-			final StringBuilder sb = new StringBuilder(200);
-			sb.append("Return value for method getPwdFromString with line : ").append(pwdAsString);
-			sb.append("\n - return value : ").append(retVal);
+			final String s =
+			    "Return value for method getPwdFromString with line : " + pwdAsString + 
+			    "\n - return value : " + retVal;
 		}
 		
 		return retVal;

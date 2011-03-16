@@ -73,9 +73,7 @@ public class BusinessManager {
 					if (smsMessage.getAccount() == null) {
 						smsMessage.setAccount(defaultAccountLabel);
 						if (logger.isDebugEnabled()) {
-							final StringBuilder sb = new StringBuilder(200);
-							sb.append("Adding the default account label to the message");
-							logger.debug(sb.toString());
+							logger.debug("Adding the default account label to the message");
 						}
 					}
 
@@ -85,11 +83,9 @@ public class BusinessManager {
 						final String tmp = messageContent.substring(0, messageMaxLength - 1);
 						smsMessage.setContent(tmp);
 						if (logger.isDebugEnabled()) {
-							final StringBuilder sb = new StringBuilder(200);
-							sb.append("Trunking the message at ").append(messageMaxLength).
-							append(" characters\n");
-							sb.append("Message is now : ").append(smsMessage.getContent());
-							logger.debug(sb.toString());
+							logger.debug("Trunking the message at " + messageMaxLength +
+								     " characters\n" +
+								     "Message is now : " + smsMessage.getContent());
 						}
 
 					}
@@ -97,27 +93,22 @@ public class BusinessManager {
 					try {
 						smsSender.sendSms(smsMessage);
 					} catch (SmsSenderException e) {
-						final StringBuilder sb = new StringBuilder(200);
-						sb.append("Unable to send SMS with : \n");
-						sb.append(" - account : ").append(smsMessage.getAccount()).append("\n");
-						sb.append(" - recipients : ").append(smsMessage.getPhoneNumbers()).append("\n");
-						sb.append(" - content : ").append(smsMessage.getContent()).append("\n");
-						logger.error(sb.toString(), e);
+						logger.error("Unable to send SMS with : \n" +
+							     " - account : " + smsMessage.getAccount() + "\n" +
+							     " - recipients : " + smsMessage.getPhoneNumbers() + "\n" +
+							     " - content : " + smsMessage.getContent() + "\n",
+							     e);
 					}
 				} else {
-					final StringBuilder sb = new StringBuilder(200);
-					sb.append("Unable to send SMS with : \n");
-					sb.append(" - account : ").append(smsMessage.getAccount()).append("\n");
-					sb.append(" - recipients : ").append(smsMessage.getPhoneNumbers()).append("\n");
-					sb.append(" - content : ").append(smsMessage.getContent()).append("\n");
-					sb.append("Wrong password.");
-					logger.warn(sb.toString());
+					logger.warn("Unable to send SMS with : \n" +
+						     " - account : " + smsMessage.getAccount() + "\n" +
+						     " - recipients : " + smsMessage.getPhoneNumbers() + "\n" +
+						     " - content : " + smsMessage.getContent() + "\n" +
+						     "Wrong password.");
 				}
 			}
 		} catch (MessageRetrieverConnectorException e) {
-			final StringBuilder sb = new StringBuilder(200);
-			sb.append("Unable to get message from the mail box ");
-			logger.error(sb.toString(), e);
+			logger.error("Unable to get message from the mail box ", e);
 		}
 	}
 
@@ -129,22 +120,16 @@ public class BusinessManager {
 		String messagePwd = smsMessage.getPwd();
 
 		if (logger.isDebugEnabled()) {
-			final StringBuilder sb = new StringBuilder(200);
-			sb.append("message pwd : ").append(messagePwd).append("\n");
-			logger.debug(sb.toString());
+			logger.debug("message pwd : " + messagePwd + "\n");
 		}
 		if (this.pwdList.contains(messagePwd)) {
 			retVal = true;
 			if (logger.isDebugEnabled()) {
-				final StringBuilder sb = new StringBuilder(200);
-				sb.append("pwd found into the list").append("\n");
-				logger.debug(sb.toString());
+				logger.debug("pwd found into the list\n");
 			}
 		} else {
 			if (logger.isDebugEnabled()) {
-				final StringBuilder sb = new StringBuilder(200);
-				sb.append("pwd not found into the list").append("\n");
-				logger.debug(sb.toString());
+				logger.debug("pwd not found into the list");
 			}
 		}
 

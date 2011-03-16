@@ -19,18 +19,14 @@ public class MailToSmsJob extends AbstractQuartzJob {
 	@Override
 	protected void executeJob(final ApplicationContext applicationContext, final JobDataMap jobDataMap) {
 		if (logger.isDebugEnabled()) {
-			final StringBuilder sb = new StringBuilder(100);
-			sb.append("Launching Quartz task MailPollingJob now");
-			logger.debug(sb.toString());
+			logger.debug("Launching Quartz task MailPollingJob now");
 		}
 		
 		final BusinessManager businessManager = (BusinessManager) applicationContext.getBean(BUSINESS_MANAGER_BEAN_NAME);
 		businessManager.sendSMS();
 		
 		if (logger.isDebugEnabled()) {
-			final StringBuilder sb = new StringBuilder(100);
-			sb.append("End of Quartz task MailPollingJob");
-			logger.debug(sb.toString());
+			logger.debug("End of Quartz task MailPollingJob");
 		}
 	}
 
