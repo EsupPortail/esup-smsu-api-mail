@@ -24,7 +24,7 @@
 		<property name="recipientsTag" value="${smsuapimail.pop.recipientsTag}"/>
 		<property name="contentTag" value="${smsuapimail.pop.contentTag}"/>
 		<property name="accountTag" value="${smsuapimail.pop.accountTag}"/>
-		<property name="phoneNumerPattern" value="${smsuapimail.pop.phoneNumerPattern}"/>		
+		<property name="phoneNumberPattern" value="${smsuapimail.pop.phoneNumberPattern}"/>		
 		<property name="endTag" value="${smsuapimail.pop.endTag}"/>
 	</bean>
 	

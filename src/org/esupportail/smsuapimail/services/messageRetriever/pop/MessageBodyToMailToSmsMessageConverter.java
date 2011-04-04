@@ -99,7 +99,7 @@ public class MessageBodyToMailToSmsMessageConverter implements InitializingBean 
 	/**
 	 * the valid phone number pattern.
 	 */
-	private String phoneNumerPattern;
+	private String phoneNumberPattern;
 	
 	/**
 	 * Message format used to parse recipient expression.
@@ -248,7 +248,7 @@ public class MessageBodyToMailToSmsMessageConverter implements InitializingBean 
 			tmpPhoneNumber = tmpPhoneNumber.trim();
 
 			// if phone number has a valid format, add it to the return value 
-			final boolean isValidPhoneNumberFormat = Pattern.matches(phoneNumerPattern, tmpPhoneNumber);
+			final boolean isValidPhoneNumberFormat = Pattern.matches(phoneNumberPattern, tmpPhoneNumber);
 			if (isValidPhoneNumberFormat) {
 				retVal.add(tmpPhoneNumber);
 				if (logger.isDebugEnabled()) {
@@ -383,10 +383,10 @@ public class MessageBodyToMailToSmsMessageConverter implements InitializingBean 
 	
 	/**
 	 * Standard setter used by spring.
-	 * @param phoneNumerPattern
+	 * @param phoneNumberPattern
 	 */
-	public void setPhoneNumerPattern(final String phoneNumerPattern) {
-		this.phoneNumerPattern = phoneNumerPattern;
+	public void setPhoneNumberPattern(final String phoneNumberPattern) {
+		this.phoneNumberPattern = phoneNumberPattern;
 	}
 	
 	/**
