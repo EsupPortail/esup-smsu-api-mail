@@ -103,12 +103,12 @@ public class SmsSenderWsImpl implements ISmsSender {
 		try {
 			
 			if (logger.isDebugEnabled()) {
-				logger.debug("Sending request isQuotaOk to back office with parameters : \n" + 
+				logger.debug("Sending request mayCreateAccountCheckQuotaOk to back office with parameters : \n" + 
 					     " - Nb of SMS : " + nbSmsToSend + "\n" + 
 					     " - Account label : " + accountLabel);
 			}
 			
-			sendSms.isQuotaOk(nbSmsToSend, accountLabel);
+			sendSms.mayCreateAccountCheckQuotaOk(nbSmsToSend, accountLabel);
 			
 		} catch (UnknownIdentifierApplicationException e) {
 			String s = "Unable to send SMS to back office due to identification problem";

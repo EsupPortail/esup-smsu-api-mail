@@ -16,8 +16,9 @@ public interface ISendSms extends Serializable {
 	 * check Quota. 
 	 * @return true or false.
 	 */
-	Boolean isQuotaOk(Integer nbDest, String labelAccount)	throws UnknownIdentifierApplicationException, 
-																   InsufficientQuotaException;
+	void mayCreateAccountCheckQuotaOk(Integer nbDest, String labelAccount)
+	throws UnknownIdentifierApplicationException, 
+	InsufficientQuotaException;
 	
 	/**
 	 * send SMS.
