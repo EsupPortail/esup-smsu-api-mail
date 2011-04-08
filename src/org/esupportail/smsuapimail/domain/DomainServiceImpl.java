@@ -1,6 +1,6 @@
 /**
- * ESUP-Portail esup-smsu-api-mail - Copyright (c) 2006 ESUP-Portail consortium
- * http://sourcesup.cru.fr/projects/esup-smsu-api-mail
+ * ESUP-Portail esup-smsuapimail - Copyright (c) 2006 ESUP-Portail consortium
+ * http://sourcesup.cru.fr/projects/esup-smsuapimail
  */
 package org.esupportail.smsuapimail.domain;
 

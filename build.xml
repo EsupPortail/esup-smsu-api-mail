@@ -1,4 +1,4 @@
-<project name="esup-smsu-api-mail" default="compile" basedir=".">
+<project name="esup-smsuapimail" default="compile" basedir=".">
 
 	<property name="recover.previous-versions" value="0.0.0" />
 	<property name="app.recover.files" value="

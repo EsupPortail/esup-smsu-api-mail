@@ -1,4 +1,4 @@
-<project name="esup-smsu-api-mail-devel" default="_compile" basedir=".">
+<project name="esup-smsuapimail-devel" default="_compile" basedir=".">
 
 	<property name="app.zip-files.include" value="
 		build.xml
@@ -61,8 +61,8 @@
 			excludes="renameApplication*.properties build-commons.xml build-commons-devel.xml version.properties" />
 		<property file="${rename-application.config}" />
 		<move file="${src.dir}/org/esupportail/smsuapimail" tofile="${src.dir}/${org/esupportail/smsuapimail}" />
-		<move file="${basedir}/utils/uPortal/esup-smsu-api-mail-portlet-fragment.xml" tofile="${basedir}/utils/uPortal/${esup-smsu-api-mail}-portlet-fragment.xml" />
-		<move file="${basedir}/utils/uPortal/esup-smsu-api-mail-portlet-chanpub.xml" tofile="${basedir}/utils/uPortal/${esup-smsu-api-mail}-portlet-chanpub.xml" />
+		<move file="${basedir}/utils/uPortal/esup-smsuapimail-portlet-fragment.xml" tofile="${basedir}/utils/uPortal/${esup-smsuapimail}-portlet-fragment.xml" />
+		<move file="${basedir}/utils/uPortal/esup-smsuapimail-portlet-chanpub.xml" tofile="${basedir}/utils/uPortal/${esup-smsuapimail}-portlet-chanpub.xml" />
 		<echo>Refactoring done.</echo>
 	</target>
 

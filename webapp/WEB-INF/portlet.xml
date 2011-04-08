@@ -7,7 +7,7 @@
 	version="1.0">
 
 	<portlet>
-		<portlet-name>esup-smsu-api-mail</portlet-name>
+		<portlet-name>esup-smsuapimail</portlet-name>
 		<portlet-class>org.apache.portals.bridges.portletfilter.FilterPortlet</portlet-class>
         <init-param>
             <name>portlet-class</name>
@@ -30,9 +30,9 @@
 			<mime-type>text/html</mime-type>
 		</supports>
 		<portlet-info>
-			<title>esup-smsu-api-mail</title>
-			<short-title>esup-smsu-api-mail portlet</short-title>
-			<keywords>esup-smsu-api-mail</keywords>
+			<title>esup-smsuapimail</title>
+			<short-title>esup-smsuapimail portlet</short-title>
+			<keywords>esup-smsuapimail</keywords>
 		</portlet-info>
 	</portlet>
 	<user-attribute>
