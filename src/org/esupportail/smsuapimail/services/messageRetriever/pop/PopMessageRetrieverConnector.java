@@ -242,7 +242,7 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 			String currentLine = reader.readLine();
 			while (currentLine != null) {
 				// this line is used to charset managment to prevent 
-				// pb with french character such as é à ...
+				// pb with french accents
 				final String tmp = new String(currentLine.getBytes(), mailCharset);
 				retVal.append(tmp).append("\n");
 				currentLine = reader.readLine();
