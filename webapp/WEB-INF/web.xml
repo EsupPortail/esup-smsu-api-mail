@@ -65,23 +65,10 @@
 		<param-value>org.apache.myfaces.renderkit.html.util.DefaultAddResource</param-value>
 	</context-param>
 
-<!--BEGIN-SERVLET-ONLY-->
-
 	<context-param>
 		<param-name>org.apache.myfaces.CHECK_EXTENSIONS_FILTER</param-name>
 		<param-value>true</param-value>
 	</context-param>
-
-<!--END-SERVLET-ONLY-->
-
-<!--BEGIN-PORTLET-ONLY-->
-
-	<context-param>
-		<param-name>org.apache.myfaces.CHECK_EXTENSIONS_FILTER</param-name>
-		<param-value>false</param-value>
-	</context-param>
-
-<!--END-PORTLET-ONLY-->
 
 	<context-param>
 		<description>
@@ -110,8 +97,6 @@
 			org.esupportail.smsuapimail.business.context.SmsuApiMailServletContextListener
 		</listener-class>
 	</listener>
-
-<!--BEGIN-SERVLET-ONLY-->
 
 	<filter>
 		<description>
@@ -173,33 +158,6 @@
 		<servlet-name>Faces Servlet</servlet-name>
 		<url-pattern>*.faces</url-pattern>
 	</servlet-mapping>
-
-<!--END-SERVLET-ONLY-->
-
-<!--BEGIN-PORTLET-ONLY-->
-
-	<servlet> 
-		<servlet-name>esup-smsuapimail</servlet-name>
-		<servlet-class>
-			org.apache.pluto.core.PortletServlet
-		</servlet-class>
-		<init-param>
-			<param-name>portlet-class</param-name>
-			<param-value>
-				org.apache.portals.bridges.portletfilter.FilterPortlet
-			</param-value>
-		</init-param>
-		<init-param>
-			<param-name>portlet-guid</param-name>
-			<param-value>esup-smsuapimail.esup-smsuapimail</param-value>
-		</init-param>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>esup-smsuapimail</servlet-name>
-		<url-pattern>/esup-smsuapimail/*</url-pattern>
-	</servlet-mapping>
-
-<!--END-PORTLET-ONLY-->
 
 	<servlet>
 		<servlet-name>Download Servlet</servlet-name>
