@@ -88,6 +88,18 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 
 		return messageList;
 	}
+
+	private Store getStore() throws MessageRetrieverConnectorException {
+		try {
+			final Properties props = System.getProperties();
+			Session session = Session.getDefaultInstance(props, null);
+			return session.getStore(POP_STORE_TYPE);
+		} catch (NoSuchProviderException e) {
+			String s = "unable to get message (due to NoSuchProviderException) from server : " + popServerAdress;
+			logger.error(s, e);
+			throw new MessageRetrieverConnectorException(s, e);
+		}
+	}
 	
 	/**
 	 * 
@@ -98,13 +110,9 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 		final List<SmsMessage> messageToProcessList = new LinkedList<SmsMessage>();
 		
 		Store store = null;
-		Folder defaultFolder = null;
 		Folder folder = null;
 
 		try {
-			// Get the session
-			final Properties props = System.getProperties();
-			Session session = Session.getDefaultInstance(props, null);
 			
 			// Connect to the pop server
 			if (logger.isDebugEnabled()) {
@@ -113,12 +121,12 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 					     " - server login : " + popServerLogin + "\n" + 
 					     " - server pass : " + "password is hidden" + "\n");
 			}
-			
-			store = session.getStore(POP_STORE_TYPE);
+
+			store = getStore();
 			store.connect(popServerAdress, popServerLogin, popServerPassword);
 
 			// Go to the default folder
-			defaultFolder = store.getDefaultFolder();
+			Folder defaultFolder = store.getDefaultFolder();
 			if (defaultFolder == null) {
 				String s = "unable to get default folder on server : " + popServerAdress;
 				logger.error(s);
@@ -163,10 +171,6 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 			}
 
 			
-		} catch (NoSuchProviderException e) {
-			String s = "unable to get message (due to NoSuchProviderException) from server : " + popServerAdress;
-			logger.error(s, e);
-			throw new MessageRetrieverConnectorException(s, e);
 		} catch (MessagingException e) {
 			String s = "unable to get message (due to MessagingException) from server : " + popServerAdress;
 			logger.error(s, e);
