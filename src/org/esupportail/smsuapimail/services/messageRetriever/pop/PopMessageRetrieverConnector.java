@@ -100,6 +100,43 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 			throw new MessageRetrieverConnectorException(s, e);
 		}
 	}
+
+	private Store getStoreAndConnect() throws MessageRetrieverConnectorException {
+		try {
+			Store store = getStore();
+			store.connect(popServerAdress, popServerLogin, popServerPassword);
+			return store;
+		} catch (MessagingException e) {
+			String s = "unable to connect to server " + popServerAdress;
+			logger.error(s, e);
+			throw new MessageRetrieverConnectorException(s, e);
+		}
+	}
+
+	private Folder getFolder(Store store) throws MessageRetrieverConnectorException {
+		try {
+			// Go to the default folder
+			Folder defaultFolder = store.getDefaultFolder();
+			if (defaultFolder == null) {
+				String s = "unable to get default folder on server : " + popServerAdress;
+				logger.error(s);
+				throw new MessageRetrieverConnectorException(s);
+			}
+			
+			// Go to the folder containing email
+			Folder folder = defaultFolder.getFolder(popFolderName);
+			if (folder == null) {
+				String s = "unable to access folder : " + popFolderName + " on server : " + popServerAdress;
+				logger.error(s);
+				throw new MessageRetrieverConnectorException(s);
+			}
+			return folder;
+		} catch (MessagingException e) {
+			String s = "unable to get message (due to MessagingException) from server : " + popServerAdress;
+			logger.error(s, e);
+			throw new MessageRetrieverConnectorException(s, e);
+		}
+	}
 	
 	/**
 	 * 
@@ -122,24 +159,9 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 					     " - server pass : " + "password is hidden" + "\n");
 			}
 
-			store = getStore();
-			store.connect(popServerAdress, popServerLogin, popServerPassword);
+			store = getStoreAndConnect();
 
-			// Go to the default folder
-			Folder defaultFolder = store.getDefaultFolder();
-			if (defaultFolder == null) {
-				String s = "unable to get default folder on server : " + popServerAdress;
-				logger.error(s);
-				throw new MessageRetrieverConnectorException(s);
-			}
-			
-			// Go to the folder containing email
-			folder = defaultFolder.getFolder(popFolderName);
-			if (folder == null) {
-				String s = "unable to get folder : " + popFolderName + " on server : " + popServerAdress;
-				logger.error(s);
-				throw new MessageRetrieverConnectorException(s);
-			}
+			folder = getFolder(store);
 			// Open the folder for read and write (write right must be present to allow delete)
 			folder.open(Folder.READ_WRITE);
 			
