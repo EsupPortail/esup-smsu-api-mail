@@ -156,11 +156,7 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 			store = getStoreAndConnect();
 			return openFolderAndCreateSmsMessages(getFolder(store));
 		} finally {
-			try {
-				if (store != null) store.close();
-			} catch (MessagingException e) {
-				logger.warn("Unable to get close the store" + " on server : " + popServerAdress, e);
-			}
+			closeStore(store);
 		}
 	}
 
@@ -221,6 +217,14 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 			}
 		}
 		return null;
+	}
+
+	private void closeStore(Store store) {
+		try {
+			if (store != null) store.close();
+		} catch (MessagingException e) {
+			logger.warn("Unable to get close the store" + " on server : " + popServerAdress, e);
+		}
 	}
 
 	private String safeGetSubject(Message email) {
