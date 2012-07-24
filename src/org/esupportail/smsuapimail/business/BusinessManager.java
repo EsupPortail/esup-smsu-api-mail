@@ -68,27 +68,8 @@ public class BusinessManager {
 			for (SmsMessage smsMessage : smsMessageList) {
 				//check if the message contains an allowed pwd.
 				if (checkPwd(smsMessage)) {
-					// if no account was defined in the message
-					// used the default account
-					if (smsMessage.getAccount() == null) {
-						smsMessage.setAccount(defaultAccountLabel);
-						if (logger.isDebugEnabled()) {
-							logger.debug("Adding the default account label to the message");
-						}
-					}
-
-					// trunk the message if it is too long
-					final String messageContent = smsMessage.getContent();
-					if (messageContent != null && messageContent.length() > messageMaxLength) {
-						final String tmp = messageContent.substring(0, messageMaxLength - 1);
-						smsMessage.setContent(tmp);
-						if (logger.isDebugEnabled()) {
-							logger.debug("Trunking the message at " + messageMaxLength +
-								     " characters\n" +
-								     "Message is now : " + smsMessage.getContent());
-						}
-
-					}
+					useDefaultAccountIfNone(smsMessage);
+					truncateContentIfTooLong(smsMessage);
 
 					try {
 						smsSender.sendSms(smsMessage);
@@ -109,6 +90,32 @@ public class BusinessManager {
 			}
 		} catch (MessageRetrieverConnectorException e) {
 			logger.error("Unable to get message from the mail box ", e);
+		}
+	}
+
+	private void useDefaultAccountIfNone(SmsMessage smsMessage) {
+		// if no account was defined in the message
+		// used the default account
+		if (smsMessage.getAccount() == null) {
+			smsMessage.setAccount(defaultAccountLabel);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Adding the default account label to the message");
+			}
+		}
+	}
+
+	private void truncateContentIfTooLong(SmsMessage smsMessage) {
+		// trunk the message if it is too long
+		final String messageContent = smsMessage.getContent();
+		if (messageContent != null && messageContent.length() > messageMaxLength) {
+			final String tmp = messageContent.substring(0, messageMaxLength - 1);
+			smsMessage.setContent(tmp);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Trunking the message at " + messageMaxLength +
+					     " characters\n" +
+					     "Message is now : " + smsMessage.getContent());
+			}
+
 		}
 	}
 
