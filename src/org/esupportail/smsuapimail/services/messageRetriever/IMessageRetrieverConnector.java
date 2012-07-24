@@ -2,7 +2,7 @@ package org.esupportail.smsuapimail.services.messageRetriever;
 
 import java.util.List;
 
-import org.esupportail.smsuapimail.domain.beans.SmsMessage;
+import org.esupportail.smsuapimail.domain.beans.RawMessage;
 import org.esupportail.smsuapimail.exceptions.MessageRetrieverConnectorException;
 
 /**
@@ -17,5 +17,5 @@ public interface IMessageRetrieverConnector {
 	 * @return
 	 * @throws MessageRetrieverConnectorException
 	 */
-	List<SmsMessage> getMessages() throws MessageRetrieverConnectorException;
+	List<RawMessage> getMessages() throws MessageRetrieverConnectorException;
 }

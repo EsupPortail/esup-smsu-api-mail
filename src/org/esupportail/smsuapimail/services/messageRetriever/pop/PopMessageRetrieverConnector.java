@@ -1,9 +1,6 @@
 package org.esupportail.smsuapimail.services.messageRetriever.pop;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -12,15 +9,13 @@ import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.Multipart;
 import javax.mail.NoSuchProviderException;
-import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.Store;
 
 import org.esupportail.commons.services.logging.Logger;
 import org.esupportail.commons.services.logging.LoggerImpl;
-import org.esupportail.smsuapimail.domain.beans.SmsMessage;
+import org.esupportail.smsuapimail.domain.beans.RawMessage;
 import org.esupportail.smsuapimail.exceptions.MessageRetrieverConnectorException;
 import org.esupportail.smsuapimail.services.messageRetriever.IMessageRetrieverConnector;
 
@@ -41,16 +36,6 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 	 * The store type on the server.
 	 */
 	private static final String POP_STORE_TYPE = "pop3";
-	
-	/**
-	 * The content type plain text.
-	 */
-	private static final String PLAIN_TEXT_CONTENT_TYPE = "text/plain";
-	
-	/**
-	 * Tool used to parse mail body.
-	 */
-	private MessageBodyToMailToSmsMessageConverter messageBodyToMailToSmsMessageConverter;
 
 	/**
 	 * Pop server address.
@@ -72,21 +57,14 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 	 */
 	private String popFolderName;
 	
-	/**
-	 * Charset supported in email.
-	 */
-	private String mailCharset;
-	
 
 	/**
 	 * Get the message on the pop server.
 	 * @return messageList
 	 * @throws MessageRetrieverConnectorException
 	 */
-	public List<SmsMessage> getMessages() throws MessageRetrieverConnectorException {
-		List<SmsMessage> messageList = getEmailFromPopServer();
-
-		return messageList;
+	public List<RawMessage> getMessages() throws MessageRetrieverConnectorException {
+		return getMessagesFromPopServer();
 	}
 
 	private Store getStore() throws MessageRetrieverConnectorException {
@@ -96,7 +74,6 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 			return session.getStore(POP_STORE_TYPE);
 		} catch (NoSuchProviderException e) {
 			String s = "unable to get message (due to NoSuchProviderException) from server : " + popServerAdress;
-			logger.error(s, e);
 			throw new MessageRetrieverConnectorException(s, e);
 		}
 	}
@@ -115,7 +92,6 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 			return store;
 		} catch (MessagingException e) {
 			String s = "unable to connect to server " + popServerAdress;
-			logger.error(s, e);
 			throw new MessageRetrieverConnectorException(s, e);
 		}
 	}
@@ -126,7 +102,6 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 			Folder defaultFolder = store.getDefaultFolder();
 			if (defaultFolder == null) {
 				String s = "unable to get default folder on server : " + popServerAdress;
-				logger.error(s);
 				throw new MessageRetrieverConnectorException(s);
 			}
 			
@@ -134,13 +109,11 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 			Folder folder = defaultFolder.getFolder(popFolderName);
 			if (folder == null) {
 				String s = "unable to access folder : " + popFolderName + " on server : " + popServerAdress;
-				logger.error(s);
 				throw new MessageRetrieverConnectorException(s);
 			}
 			return folder;
 		} catch (MessagingException e) {
 			String s = "unable to get message (due to MessagingException) from server : " + popServerAdress;
-			logger.error(s, e);
 			throw new MessageRetrieverConnectorException(s, e);
 		}
 	}
@@ -150,29 +123,29 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 	 * @return a list of messages from the pop server
 	 * @throws MessageRetrieverConnectorException
 	 */
-	private List<SmsMessage> getEmailFromPopServer() throws MessageRetrieverConnectorException {
+	private List<RawMessage> getMessagesFromPopServer() throws MessageRetrieverConnectorException {
 		Store store = null;
 		try {
 			store = getStoreAndConnect();
-			return openFolderAndCreateSmsMessages(getFolder(store));
+			return openFolderAndGetRawMessage(getFolder(store));
 		} finally {
 			closeStore(store);
 		}
 	}
 
-	private List<SmsMessage> openFolderAndCreateSmsMessages(Folder folder) throws MessageRetrieverConnectorException {
+	private List<RawMessage> openFolderAndGetRawMessage(Folder folder) throws MessageRetrieverConnectorException {
 		try {
 			// Open the folder for read and write (write right must be present to allow delete)
 			folder.open(Folder.READ_WRITE);
 			
-			final List<SmsMessage> messageToProcessList = new LinkedList<SmsMessage>();
+			final List<RawMessage> messageToProcessList = new LinkedList<RawMessage>();
 		
 			// Get the message wrappers and process them
 			for (Message email : folder.getMessages()) {			
-				SmsMessage mailToSmsMessage = mayConvertMessageToMailToSmsMessage(email);
-				if (mailToSmsMessage != null)
+				RawMessage msg = mayCreateRawMessageFromMessage(email);
+				if (msg != null)
 					// An error on a single email does not perform a global error
-					messageToProcessList.add(mailToSmsMessage);
+					messageToProcessList.add(msg);
 			}
 
 			if (logger.isDebugEnabled()) {
@@ -183,17 +156,16 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 			
 		} catch (MessagingException e) {
 			String s = "unable to get message (due to MessagingException) from server : " + popServerAdress;
-			logger.error(s, e);
 			throw new MessageRetrieverConnectorException(s, e);
 		} finally {
 			closeFolder(folder);
 		}
 	}
 
-	private SmsMessage mayConvertMessageToMailToSmsMessage(final Message email) {
+	private RawMessage mayCreateRawMessageFromMessage(final Message email) throws MessageRetrieverConnectorException {
 		try {
 			if (!email.isSet(Flags.Flag.DELETED)) {
-				return convertMessageToMailToSmsMessage(email);
+				return new RawMessage(email);
 			}
 		} catch (MessagingException e) {
 			logger.error("Unable to manage email with subject : " + safeGetSubject(email) + " due to MessagingException", e);
@@ -240,73 +212,6 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 	}
 	
 	/**
-	 * 
-	 * @param email
-	 * @return a Sms message from a mail
-	 * @throws IOException
-	 * @throws MessagingException
-	 */
-	private SmsMessage convertMessageToMailToSmsMessage(final Message email) throws IOException, MessagingException {
-		// extract message text from email 
-		final String message = getTextFromMessage(email);
-		
-		// convert text to MailToSms
-		final SmsMessage retVal = messageBodyToMailToSmsMessageConverter.convertMessageBodyToMailToSmsMessage(message);
-		return retVal;
-	}
-	
-	/**
-	 * 
-	 * @param email
-	 * @return a text from a message.
-	 * @throws IOException
-	 * @throws MessagingException
-	 */
-	private String getTextFromMessage(final Message email) throws IOException, MessagingException {			
-		Part messagePart = getFirstBodyPart(email);
-		String contentType = messagePart.getContentType();
-		
-		// only accept plain text message
-		if (contentType.contains(PLAIN_TEXT_CONTENT_TYPE)) {
-			return getTextFromInputStream(messagePart.getInputStream());
-		} else {
-			String s = "Message with subject : " + email.getSubject() + 
-			    " rejected because it is not a plain/text email";
-			logger.error(s);
-			throw new MessagingException(s);
-		}
-	}
-
-	private Part getFirstBodyPart(Message email) throws IOException, MessagingException {
-		final Object messageContent = email.getContent();	
-		if (messageContent instanceof Multipart) {
-			return ((Multipart) messageContent).getBodyPart(0);
-		} else {
-			return email;
-		}	
-	}
-
-	private String getTextFromInputStream(InputStream is) throws IOException {
-		final BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-		String currentLine = reader.readLine();
-
-		final StringBuilder retVal = new StringBuilder(300);
-		
-		while (currentLine != null) {
-			// this line is used to charset managment to prevent 
-			// pb with french accents
-			final String tmp = new String(currentLine.getBytes(), mailCharset);
-			retVal.append(tmp).append("\n");
-			currentLine = reader.readLine();
-		}
-			
-		if (logger.isDebugEnabled()) {
-			logger.debug("Text extract from message is : \n" + retVal.toString());
-		}
-		return retVal.toString();
-	}
-	
-	/**
 	 * Standard setter used by Spring.
 	 * @param popServerAdress
 	 */
@@ -336,23 +241,6 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 	 */
 	public void setPopFolderName(final String popFolderName) {
 		this.popFolderName = popFolderName;
-	}
-	
-	/**
-	 * Standard setter used by Spring.
-	 * @param messageBodyToMailToSmsMessageConverter
-	 */
-	public void setMessageBodyToMailToSmsMessageConverter(
-			final MessageBodyToMailToSmsMessageConverter messageBodyToMailToSmsMessageConverter) {
-		this.messageBodyToMailToSmsMessageConverter = messageBodyToMailToSmsMessageConverter;
-	}
-	
-	/**
-	 * Standard setter used by Spring.
-	 * @param mailCharset 
-	 */
-	public void setMailCharset(final String mailCharset) {
-		this.mailCharset = mailCharset;
 	}
 
 }

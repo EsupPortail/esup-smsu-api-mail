@@ -139,7 +139,6 @@ public class MessageBodyToMailToSmsMessageConverter implements InitializingBean 
 			final String s = 
 			    "No recipient found in message : \n" +
 			    " - message : " + messageBody;
-			logger.error(s);
 			throw new MessagingException(s);
 		}
 		
@@ -193,7 +192,6 @@ public class MessageBodyToMailToSmsMessageConverter implements InitializingBean 
 				    " - message body : [" + messageBodyTrimed + "]\n" + 
 				    " - pattern : [" + messageBody + messageFormater.toPattern() + "]\n" + 
 				    " - Parse index error is : " + parsePosition.getErrorIndex();
-				logger.error(s);
 				throw new MessagingException(s);
 			}
 		}
@@ -219,7 +217,6 @@ public class MessageBodyToMailToSmsMessageConverter implements InitializingBean 
 			final String s = 
 			    "The message body does not match with the pattern \n" + 
 			    " - message body : " + messageBody;
-			logger.error(s);
 			throw new MessagingException(s);
 		}
 		

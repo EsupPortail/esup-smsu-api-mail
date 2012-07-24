@@ -5,28 +5,27 @@ import java.util.List;
 
 import org.esupportail.commons.services.logging.Logger;
 import org.esupportail.commons.services.logging.LoggerImpl;
+import org.esupportail.commons.utils.Assert;
 import org.esupportail.smsuapimail.domain.beans.SmsMessage;
-import org.esupportail.smsuapimail.exceptions.MessageRetrieverConnectorException;
 import org.esupportail.smsuapimail.exceptions.SmsSenderException;
 import org.esupportail.smsuapimail.services.messageRetriever.IMessageRetrieverConnector;
+import org.esupportail.smsuapimail.services.messageRetriever.MessageRetriever;
 import org.esupportail.smsuapimail.services.smsSender.ISmsSender;
+import org.springframework.beans.factory.InitializingBean;
 
 /**
  * Business layer of the application.
  * @author prqd8824
  *
  */
-public class BusinessManager {
+public class BusinessManager implements InitializingBean {
 
 	/**
 	 * A logger.
 	 */
 	private final Logger logger = new LoggerImpl(getClass());
 
-	/**
-	 * Tool used to get message from mail box.
-	 */
-	private IMessageRetrieverConnector messageRetrieverConnector;
+	private MessageRetriever messageRetriever;
 
 	/**
 	 * Tool used to send SMS to the Back office.
@@ -55,41 +54,46 @@ public class BusinessManager {
 	public BusinessManager() {
 		//no special instruction.
 	}
+
+	public void afterPropertiesSet() {
+		Assert.notNull(this.messageRetriever, "property messageRetriever of class " 
+				+ this.getClass().getName() + " can not be null");
+	}
+
 	/**
 	 * Get the message from the email box and send the message to the back office.
 	 */
 	public void sendSMS() {
-		try {
-			// get the message list from the connector
-			final List<SmsMessage> smsMessageList = messageRetrieverConnector.getMessages();
+		// get the message list from the connector
+		final List<SmsMessage> messageList = messageRetriever.getMessages();
 
+		// for each message, send all sms to the back office
+		for (SmsMessage msg : messageList) {
+			sendOneMessage(msg);
+		}
+	}
 
-			// for each message, send all sms to the back office
-			for (SmsMessage smsMessage : smsMessageList) {
-				//check if the message contains an allowed pwd.
-				if (checkPwd(smsMessage)) {
-					useDefaultAccountIfNone(smsMessage);
-					truncateContentIfTooLong(smsMessage);
-
-					try {
-						smsSender.sendSms(smsMessage);
-					} catch (SmsSenderException e) {
-						logger.error("Unable to send SMS with : \n" +
-							     " - account : " + smsMessage.getAccount() + "\n" +
-							     " - recipients : " + smsMessage.getPhoneNumbers() + "\n" +
-							     " - content : " + smsMessage.getContent() + "\n",
-							     e);
-					}
-				} else {
-					logger.warn("Unable to send SMS with : \n" +
-						     " - account : " + smsMessage.getAccount() + "\n" +
-						     " - recipients : " + smsMessage.getPhoneNumbers() + "\n" +
-						     " - content : " + smsMessage.getContent() + "\n" +
-						     "Wrong password.");
-				}
+	private void sendOneMessage(SmsMessage smsMessage) {
+		//check if the message contains an allowed pwd.
+		if (checkPwd(smsMessage)) {
+			useDefaultAccountIfNone(smsMessage);
+			truncateContentIfTooLong(smsMessage);
+			
+			try {
+				smsSender.sendSms(smsMessage);
+			} catch (SmsSenderException e) {
+				logger.error("Unable to send SMS with : \n" +
+					     " - account : " + smsMessage.getAccount() + "\n" +
+					     " - recipients : " + smsMessage.getPhoneNumbers() + "\n" +
+					     " - content : " + smsMessage.getContent() + "\n",
+					     e);
 			}
-		} catch (MessageRetrieverConnectorException e) {
-			logger.error("Unable to get message from the mail box ", e);
+		} else {
+			logger.warn("Unable to send SMS with : \n" +
+				    " - account : " + smsMessage.getAccount() + "\n" +
+				    " - recipients : " + smsMessage.getPhoneNumbers() + "\n" +
+				    " - content : " + smsMessage.getContent() + "\n" +
+				    "Wrong password.");
 		}
 	}
 
@@ -145,11 +149,10 @@ public class BusinessManager {
 
 	/**
 	 * Standard setter used by spring.
-	 * @param messageRetrieverConnector
+	 * @param messageRetriever
 	 */
-	public void setMessageRetrieverConnector(
-			final IMessageRetrieverConnector messageRetrieverConnector) {
-		this.messageRetrieverConnector = messageRetrieverConnector;
+	public void setMessageRetriever(final MessageRetriever messageRetriever) {
+		this.messageRetriever = messageRetriever;
 	}
 
 	/**

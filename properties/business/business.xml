@@ -6,7 +6,7 @@
 	
 	<bean id="businessManager"
 		class="org.esupportail.smsuapimail.business.BusinessManager">
-		<property name="messageRetrieverConnector" ref="popMessageRetrieverConnector"/>
+		<property name="messageRetriever" ref="messageRetriever"/>
 		<property name="smsSender" ref="smsSenderWsImpl"/>
 		<property name="defaultAccountLabel">
 			<value>${smsuapimail.account.label}</value>

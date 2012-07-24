@@ -8,14 +8,19 @@
 	http://www.springframework.org/schema/aop 
 	http://www.springframework.org/schema/aop/spring-aop.xsd">
 
+	<bean id="messageRetriever"
+		class="org.esupportail.smsuapimail.services.messageRetriever.MessageRetriever">
+		<property name="messageBodyToMailToSmsMessageConverter" ref="messageBodyToMailToSmsMessageConverter"/>
+		<property name="messageRetrieverConnector" ref="popMessageRetrieverConnector"/>
+		<property name="mailCharset" value="${smsuapimail.pop.mailCharset}"/>  
+	</bean>
+
 	<bean id="popMessageRetrieverConnector"
 		class="org.esupportail.smsuapimail.services.messageRetriever.pop.PopMessageRetrieverConnector">
-		<property name="messageBodyToMailToSmsMessageConverter" ref="messageBodyToMailToSmsMessageConverter"/>
 		<property name="popServerAdress" value="${smsuapimail.pop.serverAddress}"/>
 		<property name="popServerLogin" value="${smsuapimail.pop.serverLogin}"/>
 		<property name="popServerPassword" value="${smsuapimail.pop.serverPassword}"/>
 		<property name="popFolderName" value="${smsuapimail.pop.folderName}"/>
-		<property name="mailCharset" value="${smsuapimail.pop.mailCharset}"/>  
 	</bean>
 	
 	<bean id="messageBodyToMailToSmsMessageConverter"
