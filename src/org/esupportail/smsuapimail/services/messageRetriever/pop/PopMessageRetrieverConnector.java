@@ -104,6 +104,13 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 	private Store getStoreAndConnect() throws MessageRetrieverConnectorException {
 		try {
 			Store store = getStore();
+			
+			if (logger.isDebugEnabled()) {
+				logger.debug("Connecting to pop serveur : \n" + 
+					     " - server address : " + popServerAdress + "\n" +
+					     " - server login : " + popServerLogin + "\n" + 
+					     " - server pass : " + "password is hidden" + "\n");
+			}
 			store.connect(popServerAdress, popServerLogin, popServerPassword);
 			return store;
 		} catch (MessagingException e) {
@@ -144,27 +151,26 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 	 * @throws MessageRetrieverConnectorException
 	 */
 	private List<SmsMessage> getEmailFromPopServer() throws MessageRetrieverConnectorException {
-		final List<SmsMessage> messageToProcessList = new LinkedList<SmsMessage>();
-		
 		Store store = null;
-		Folder folder = null;
-
 		try {
-			
-			// Connect to the pop server
-			if (logger.isDebugEnabled()) {
-				logger.debug("Connecting to pop serveur : \n" + 
-					     " - server address : " + popServerAdress + "\n" +
-					     " - server login : " + popServerLogin + "\n" + 
-					     " - server pass : " + "password is hidden" + "\n");
-			}
-
 			store = getStoreAndConnect();
+			return openFolderAndCreateSmsMessages(getFolder(store));
+		} finally {
+			try {
+				if (store != null) store.close();
+			} catch (MessagingException e) {
+				logger.warn("Unable to get close the store" + " on server : " + popServerAdress, e);
+			}
+		}
+	}
 
-			folder = getFolder(store);
+	private List<SmsMessage> openFolderAndCreateSmsMessages(Folder folder) throws MessageRetrieverConnectorException {
+		try {
 			// Open the folder for read and write (write right must be present to allow delete)
 			folder.open(Folder.READ_WRITE);
 			
+			final List<SmsMessage> messageToProcessList = new LinkedList<SmsMessage>();
+		
 			// Get the message wrappers and process them
 			for (Message email : folder.getMessages()) {			
 				SmsMessage mailToSmsMessage = mayConvertMessageToMailToSmsMessage(email);
@@ -172,13 +178,19 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 					// An error on a single email does not perform a global error
 					messageToProcessList.add(mailToSmsMessage);
 			}
+
+			if (logger.isDebugEnabled()) {
+				logger.debug("Found " + messageToProcessList.size() + " emails to proceed");
+			}
+		
+			return messageToProcessList;
 			
 		} catch (MessagingException e) {
 			String s = "unable to get message (due to MessagingException) from server : " + popServerAdress;
 			logger.error(s, e);
 			throw new MessageRetrieverConnectorException(s, e);
 		} finally {
-	    	// close the folder
+			// close the folder
 			try {
 				if (folder != null) {
 					// true because we want to delete message marked as deleted
@@ -188,21 +200,7 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 				logger.warn("Unable to close folder : " + popFolderName + 
 					    " on server : " + popServerAdress, e);
 			}
-				
-			try {
-				if (store != null) {
-					store.close();
-				}
-			} catch (MessagingException e) {
-				logger.warn("Unable to get close the store" + " on server : " + popServerAdress, e);
-			}
 		}
-		
-		if (logger.isDebugEnabled()) {
-			logger.debug("Found " + messageToProcessList.size() + " emails to proceed");
-		}
-		
-		return messageToProcessList;
 	}
 
 	private SmsMessage mayConvertMessageToMailToSmsMessage(final Message email) {
