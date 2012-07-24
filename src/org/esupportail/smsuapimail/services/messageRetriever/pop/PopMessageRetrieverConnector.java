@@ -186,16 +186,7 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 			logger.error(s, e);
 			throw new MessageRetrieverConnectorException(s, e);
 		} finally {
-			// close the folder
-			try {
-				if (folder != null) {
-					// true because we want to delete message marked as deleted
-					folder.close(true);
-				}
-			} catch (MessagingException e) {
-				logger.warn("Unable to close folder : " + popFolderName + 
-					    " on server : " + popServerAdress, e);
-			}
+			closeFolder(folder);
 		}
 	}
 
@@ -217,6 +208,19 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 			}
 		}
 		return null;
+	}
+
+	private void closeFolder(Folder folder) {
+		// close the folder
+		try {
+			if (folder != null) {
+				// true because we want to delete message marked as deleted
+				folder.close(true);
+			}
+		} catch (MessagingException e) {
+			logger.warn("Unable to close folder : " + popFolderName + 
+				    " on server : " + popServerAdress, e);
+		}
 	}
 
 	private void closeStore(Store store) {
