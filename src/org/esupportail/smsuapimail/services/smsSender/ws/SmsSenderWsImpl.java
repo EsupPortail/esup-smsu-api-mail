@@ -111,14 +111,11 @@ public class SmsSenderWsImpl implements ISmsSender {
 			sendSms.mayCreateAccountCheckQuotaOk(nbSmsToSend, accountLabel);
 			
 		} catch (UnknownIdentifierApplicationException e) {
-			String s = "Unable to send SMS to back office due to identification problem";
-			logger.error(s, e);
-			throw new SmsSenderException(s, e);
-
+			throw new SmsSenderException("ERROR.BACK.OFFICE.UNKNOWN.IDENTIFIER.APPLICATION", e);
 		} catch (InsufficientQuotaException e) {
-			String s = "Unable to send SMS to back office due to quota problem";
-			logger.error(s, e);
-			throw new SmsSenderException(s, e);
+			throw new SmsSenderException("ERROR.BACK.OFFICE.INSUFFICIENT.QUOTA", e);
+		} catch (java.lang.reflect.UndeclaredThrowableException e) {
+			throw new SmsSenderException("ERROR.BACK.OFFICE", e.getCause());
 		}
 	}
 	

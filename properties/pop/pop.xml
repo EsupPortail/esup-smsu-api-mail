@@ -12,6 +12,9 @@
 		class="org.esupportail.smsuapimail.services.messageRetriever.MessageRetriever">
 		<property name="messageBodyToMailToSmsMessageConverter" ref="messageBodyToMailToSmsMessageConverter"/>
 		<property name="messageRetrieverConnector" ref="popMessageRetrieverConnector"/>
+		<property name="smtpService" ref="smtpService"/>
+		<property name="i18nService" ref="i18nService"/>
+		<property name="exceptionHandlingEmail" value="${exceptionHandling.email}"/>
 		<property name="mailCharset" value="${smsuapimail.pop.mailCharset}"/>  
 	</bean>
 

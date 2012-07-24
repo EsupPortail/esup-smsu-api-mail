@@ -2,20 +2,25 @@ package org.esupportail.smsuapimail.services.messageRetriever.pop;
 
 import java.text.MessageFormat;
 import java.text.ParsePosition;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.regex.Pattern;
-
-import javax.mail.MessagingException;
+import java.util.regex.Matcher;
 
 import org.esupportail.commons.services.logging.Logger;
 import org.esupportail.commons.services.logging.LoggerImpl;
 import org.esupportail.smsuapimail.domain.beans.SmsMessage;
+import org.esupportail.smsuapimail.exceptions.ParsingMessageBodyException;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
  * This class is used to convert a email body into a valid mailtoSmsMessage.
- * @author prqd8824
  *
  */
 public class MessageBodyToMailToSmsMessageConverter implements InitializingBean {
@@ -26,50 +31,9 @@ public class MessageBodyToMailToSmsMessageConverter implements InitializingBean 
 	private final Logger logger = new LoggerImpl(getClass());
 	
 	/**
-	 * the separator used between the tag and the value.
+	 * the regular expression used to find tags
 	 */
-	private static final String SEPARATOR_CHAR = "=";
-	
-	/**
-	 * Message index in message format result.
-	 */
-	private static final int MESSAGE_FORMAT_PWD_IDX = 0;
-	
-	/**
-	 * Message pattenr for message format.
-	 */
-	private static final String MESSAGE_FORMAT_PWD = "{0}";
-	
-	/**
-	 * Recipient index in message format result.
-	 */
-	private static final int MESSAGE_FORMAT_RECIPIENTS_IDX = 1;
-	
-	/**
-	 * Recipient pattenr for message format.
-	 */
-	private static final String MESSAGE_FORMAT_RECIPIENTS = "{1}";
-	
-	/**
-	 * Account index in message format result.
-	 */
-	private static final int MESSAGE_FORMAT_ACCOUNT_IDX = 2;
-	
-	/**
-	 * Account pattenr for message format.
-	 */
-	private static final String MESSAGE_FORMAT_ACCOUNT = "{2}";
-	
-	/**
-	 * Message index in message format result.
-	 */
-	private static final int MESSAGE_FORMAT_MESSAGE_IDX = 3;
-	
-	/**
-	 * Message pattenr for message format.
-	 */
-	private static final String MESSAGE_FORMAT_MESSAGE = "{3}";
-	
+	private static final String TAG_PATTERN = "\\s*(\\w+)\\s*=\\s*";
 	
 	/**
 	 * the separator comma used to separate phone number.
@@ -102,25 +66,12 @@ public class MessageBodyToMailToSmsMessageConverter implements InitializingBean 
 	private String phoneNumberPattern;
 	
 	/**
-	 * Message format used to parse recipient expression.
-	 */
-	private MessageFormat messageFormater;
-	
-	
-	/**
 	 * message end tag
 	 */
 	private String endTag;
 	
-	/* (non-Javadoc)
-	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
-	 */
 	public void afterPropertiesSet() {
-		messageFormater = new MessageFormat(pwdTag + SEPARATOR_CHAR + MESSAGE_FORMAT_PWD +
-											recipientsTag + SEPARATOR_CHAR + MESSAGE_FORMAT_RECIPIENTS +
-											accountTag + SEPARATOR_CHAR + MESSAGE_FORMAT_ACCOUNT +
-											contentTag + SEPARATOR_CHAR + MESSAGE_FORMAT_MESSAGE);
-		
+		//tests();
 	}
 	
 	/**
@@ -128,99 +79,118 @@ public class MessageBodyToMailToSmsMessageConverter implements InitializingBean 
 	 * @param messageBody
 	 * @return
 	 */
-	public SmsMessage convertMessageBodyToMailToSmsMessage(final String messageBody) throws MessagingException {
-		
-		final SmsMessage smsMessage = formatTextMessage(messageBody);
-		
-		final List<String> recipients = smsMessage.getPhoneNumbers();
-		
-		// if no recipient found : error
-		if (recipients == null || recipients.size() == 0) {
-			final String s = 
-			    "No recipient found in message : \n" +
-			    " - message : " + messageBody;
-			throw new MessagingException(s);
-		}
-		
+	public SmsMessage convertMessageBodyToMailToSmsMessage(String messageBody) throws ParsingMessageBodyException {
+		messageBody = mayRemoveSignature(messageBody).trim();
+
+		List<String> weirdTags = new LinkedList<String>();	
+		Map<String, String> tag2value = parseTagAndGetValues(messageBody, weirdTags);
+
+		checkValues(tag2value, weirdTags);
+
+		final SmsMessage smsMessage = createSmsMessageFromValues(tag2value);
 		
 		if (logger.isDebugEnabled()) {
 			logger.debug("convertMessageBodyToMailToSmsMessage return value : \n" + 
-				     " - recipient list : " + recipients + "\n" + 
+				     " - recipient list : " + smsMessage.getPhoneNumbers() + "\n" + 
 				     " - account : " + smsMessage.getAccount() + "\n" + 
 				     " - content : " + smsMessage.getContent() + "\n");
-		}
-		
+		}	
 		return smsMessage;
 		
 	}
-	
-	
-	/**
-	 * Parse the message to extract datas.
-	 * @param messageBody
-	 * @return
-	 * @throws MessagingException
-	 */
-	private SmsMessage formatTextMessage(final String messageBody) throws MessagingException {
-		SmsMessage retVal = null;
-		
-		Object[] result = null;
-		final ParsePosition parsePosition = new ParsePosition(0);
-		
-		// /!\ Message format is not thread safe 
-		
-		synchronized (messageFormater) {
-			// search a mail signature
-			String messageBodyWithoutSignature;
-			
-			if (messageBody.indexOf(endTag) != -1){
-				messageBodyWithoutSignature = messageBody.substring(0, messageBody.indexOf(endTag));
-				if (logger.isDebugEnabled()) {
-					logger.debug("Signature removed : " + messageBody.substring(messageBody.indexOf(endTag)));
+
+	private SmsMessage createSmsMessageFromValues(Map<String, String> tag2value) {
+		SmsMessage msg = new SmsMessage();
+		msg.setPwd(getSimplifiedString(tag2value, pwdTag));
+		msg.setPhoneNumbers(getRecipientsFromString(getSimplifiedString(tag2value, recipientsTag)));
+		msg.setAccount(getSimplifiedString(tag2value, accountTag));
+		msg.setContent(getSimplifiedString(tag2value, contentTag));
+		return msg;
+	}
+
+	private void checkValues(Map<String, String> tag2value, List<String> weirdTags) throws ParsingMessageBodyException {
+		Set<String> nonEmptyTags = nonEmptyTags();
+		Set<String> mandatoryTags = nonEmptyTags;
+
+		for (Entry<String, String> e : tag2value.entrySet()) {
+			String tag = e.getKey();
+			String val = e.getValue();
+			if (val == null) {
+				if (mandatoryTags.contains(tag)) {
+					throw new ParsingMessageBodyException.MissingMandatoryTag(tag, weirdTags, tag2value.get(""));
 				}
+			} else if (val.trim().equals("")) {
+				if (nonEmptyTags.contains(tag))
+					throw new ParsingMessageBodyException("ERROR.PARSING.EMPTY.TAG", tag);
+			}
+		}
+	}
+
+	private String[] knownTags() {
+		String[] l = { pwdTag, accountTag, recipientsTag, contentTag };
+		return l;
+	}
+
+	private Set<String> nonEmptyTags() {
+		String[] l = { pwdTag, recipientsTag, contentTag };
+		return new HashSet(Arrays.asList(l));
+	}
+
+	private Map<String, String> tag2nullValue() {
+		Map<String, String> r = new HashMap<String, String>();
+		for (String tag : knownTags()) r.put(tag, null);
+		return r;
+	}
+
+	private Map<String, String> parseTagAndGetValues(String messageBody, List<String> weirdTags) throws ParsingMessageBodyException {
+		Pattern tag_pattern = Pattern.compile(TAG_PATTERN);
+
+		Map<String, String> tag2value = tag2nullValue();
+		tag2value.put("", null);
+		String currentTag = "";
+		while (!messageBody.equals("")) {
+			String value;
+			String nextTag = null;
+			Matcher matcher = tag_pattern.matcher(messageBody);
+			if (matcher.find()) {
+				String before = messageBody.substring(0, matcher.start());
+				String tag = matcher.group(1).toLowerCase();
+
+				if (tag2value.containsKey(tag)) {
+					if (!tag.equals(currentTag)) {
+						nextTag = tag;
+					}
+					value = before;
+				} else {
+					weirdTags.add(tag);
+					// ignore this tag:
+					value = before + matcher.group();
+				}
+				messageBody = messageBody.substring(matcher.end());
 			} else {
-				messageBodyWithoutSignature = messageBody;
+				// no more tags
+				value = messageBody;
+				messageBody = "";
 			}
-			// trim the body to avoid white spaces parsing problems
-			final String messageBodyTrimed  = messageBodyWithoutSignature.trim();
-			
-			result = messageFormater.parse(messageBodyTrimed, parsePosition);
+			value = replaceCarriageReturn(value);
 
-			// if error index != -1 => parsing error 
-			if (parsePosition.getErrorIndex() != -1) {
-				String s = "The message body does not match with the pattern \n" + 
-				    " - message body : [" + messageBodyTrimed + "]\n" + 
-				    " - pattern : [" + messageBody + messageFormater.toPattern() + "]\n" + 
-				    " - Parse index error is : " + parsePosition.getErrorIndex();
-				throw new MessagingException(s);
-			}
+			String prev = tag2value.get(currentTag);
+			tag2value.put(currentTag, (prev == null ? "" : prev + " ") + value);
+
+			if (nextTag != null) currentTag = nextTag;
 		}
+		return tag2value;
+	}
 
-		if (result != null && result.length >= MESSAGE_FORMAT_MESSAGE_IDX) {
-			final String rawPwd = (String) result[MESSAGE_FORMAT_PWD_IDX];
-			final String rawRecipients = (String) result[MESSAGE_FORMAT_RECIPIENTS_IDX];
-			final String rawAccount = (String) result[MESSAGE_FORMAT_ACCOUNT_IDX];
-			final String rawMessage = (String) result[MESSAGE_FORMAT_MESSAGE_IDX];
-
-			final String pwd = getPwdFromString(rawPwd);
-			final List<String> recipients = getRecipientsFromString(rawRecipients);
-			final String account = getAccountFromString(rawAccount);
-			final String message = getMesssageFromString(rawMessage);
-			
-			retVal = new SmsMessage();
-			retVal.setPwd(pwd);
-			retVal.setPhoneNumbers(recipients);
-			retVal.setAccount(account);
-			retVal.setContent(message);
-			
+	private String mayRemoveSignature(String messageBody) {
+		int pos = messageBody.indexOf(endTag);
+		if (pos != -1) {
+			if (logger.isDebugEnabled())
+				logger.debug("Signature removed : " + messageBody.substring(pos));
+			return messageBody.substring(0, pos);
 		} else {
-			final String s = 
-			    "The message body does not match with the pattern \n" + 
-			    " - message body : " + messageBody;
-			throw new MessagingException(s);
+			return messageBody;
 		}
-		
-		return retVal;		
 	}
 	
 	/**
@@ -228,130 +198,43 @@ public class MessageBodyToMailToSmsMessageConverter implements InitializingBean 
 	 * @param recipientsAsStringWithTag
 	 * @return
 	 */
-	private List<String> getRecipientsFromString(final String recipientsAsString) {
+	private List<String> getRecipientsFromString(final String recipientsAsString) {	
+		final String[] phoneNumbers = recipientsAsString.split(COMMA_SEPARATOR_REGULAR_EXPR);
+
 		List<String> retVal  = new LinkedList<String>();
-		
-		
-		if (logger.isDebugEnabled()) {
-			logger.debug("Start parsing line : " + recipientsAsString);
-		}
-
-		final String tmpRecipientAsString = removeCarriageReturn(recipientsAsString);
-		
-		final String[] recipientArray = tmpRecipientAsString.split(COMMA_SEPARATOR_REGULAR_EXPR);
-
-		for (int i = 0; i < recipientArray.length; i++) {
-			String tmpPhoneNumber = recipientArray[i];
-			tmpPhoneNumber = tmpPhoneNumber.trim();
+		for (String phoneNumber : phoneNumbers) {
+			phoneNumber = phoneNumber.trim();
 
 			// if phone number has a valid format, add it to the return value 
-			final boolean isValidPhoneNumberFormat = Pattern.matches(phoneNumberPattern, tmpPhoneNumber);
-			if (isValidPhoneNumberFormat) {
-				retVal.add(tmpPhoneNumber);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Valid recipient phone number found : " + tmpPhoneNumber);
-				}
+			if (Pattern.matches(phoneNumberPattern, phoneNumber)) {
+				retVal.add(phoneNumber);
 			} else {
-				logger.warn("InValid recipient phone number found : " + tmpPhoneNumber + "\n" + 
+				logger.warn("Invalid recipient phone number found : " + phoneNumber + "\n" + 
 					    "The phone number is rejected");
 			}
 
 		}
-		
-		if (logger.isDebugEnabled()) {
-			@SuppressWarnings("unused")
-			final String s = 
-			    "Return value for method getRecipientsFromStringWithTag with line : " + recipientsAsString + 
-			    "\n - return value : " + retVal;
-		}
-		
-		return retVal;
-	}
-	
-	
-	/**
-	 * Extract an account from a string.
-	 * @param contentAsStringWithTag
-	 * @return
-	 */
-	private String getAccountFromString(final String accountAsString) {
-		String retVal = null;
 
-		String account = accountAsString.trim();
-		account = removeCarriageReturn(account);
-		
-		if (account.length() > 0) {
-			retVal = account;
-		}
-					
-		if (logger.isDebugEnabled()) {
-			final StringBuilder sb = new StringBuilder(200);
-			sb.append("Return value for method getAccountFromStringWithTag with line : " + accountAsString);
-			sb.append("\n - return value : " + retVal);
-		}
-		
 		return retVal;
 	}
-	
-	
+		
 	/**
-	 * extract a message.
-	 * @param contentAsStringWithTag
-	 * @return
-	 */
-	private String getMesssageFromString(final String messageAsString) {
-		String retVal = null;
-
-		String message = messageAsString.trim();
-		message = removeCarriageReturn(message);
-		
-		if (message.length() > 0) {
-			retVal = message;
-		}
-					
-		if (logger.isDebugEnabled()) {
-			@SuppressWarnings("unused")
-			final String s = 
-			    "Return value for method getMesssageFromString with line : " + messageAsString + 
-			    "\n - return value : " + retVal;
-		}
-		
-		return retVal;
-	}
-	
-	/**
-	 * extract a pwd.
-	 * @param pwdAsString
-	 * @return the pwd or null.
-	 */
-	private String getPwdFromString(final String pwdAsString) {
-		String retVal = null;
-		
-		String pwd = pwdAsString.trim();
-		pwd = removeCarriageReturn(pwd);
-		
-		if (pwd.length() > 0) {
-			retVal = pwd;
-		}
-		
-		if (logger.isDebugEnabled()) {
-			@SuppressWarnings("unused")
-			final String s =
-			    "Return value for method getPwdFromString with line : " + pwdAsString + 
-			    "\n - return value : " + retVal;
-		}
-		
-		return retVal;
-
-	}
-	/**
-	 * remove carriage return in the specified string.
+	 * replace carriage return in the specified string.
 	 * @param str
 	 * @return
 	 */
-	private String removeCarriageReturn(final String str) {
-		final String retVal =  str.replace("\n", "");
-		return retVal;
+	private String replaceCarriageReturn(final String str) {
+		return str.replaceAll("\r?\n", " ");
+	}
+
+	/**
+	 * extract a simplified value.
+	 * @param s
+	 * @return the value or null.
+	 */
+	private String getSimplifiedString(Map<String,String> tag2value, String tag) {
+		String r = tag2value.get(tag);
+		return r != null && r.length() > 0 ? r : null;
 	}
 	
 	/**
@@ -400,6 +283,57 @@ public class MessageBodyToMailToSmsMessageConverter implements InitializingBean 
 	 */
 	public void setEndTag(final String endTag) {
 		this.endTag = endTag;
+	}
+
+	public static String join(Iterable<?> elements, CharSequence separator) {
+		if (elements == null) return "";
+
+		StringBuilder sb = null;
+
+		for (Object s : elements) {
+			if (sb == null)
+				sb = new StringBuilder();
+			else
+				sb.append(separator);
+			sb.append(s);			
+		}
+		return sb == null ? "" : sb.toString();
+	}
+
+	private void tests() {
+		String test1 =
+			"paSSwd=xxx\n" +
+			" destinataires=0652767674\n" +
+			"compte = mail2sms.crir.paris1\n" +
+			"message =  test 13h38 (blacklisted)\n" +
+			"citron  d'\u00E9t\u00E9 \r\n" +
+			"!!!!! \n";
+
+		String test2 =
+			"destinataires=0652767674 passwd=xxx\n" +
+			"message=a\n" +
+			"message=b\n";
+
+		String test3 =
+			"foobar zzzz=0652767674 passwd=xxx\n" +
+			"message=a\n" +
+			"message=b\n";
+
+		String test4 =
+			"presque vide";
+
+		String test_vide =
+			"";
+
+		String[] tests = { test1, test2, test3, test4, test_vide };
+
+		for (String test : tests) {
+			try {
+				convertMessageBodyToMailToSmsMessage(test);
+			} catch (ParsingMessageBodyException e) {
+				logger.error(e);
+			}
+		}
 	}
 
 }

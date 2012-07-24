@@ -85,17 +85,23 @@ public class BusinessManager implements InitializingBean {
 				logger.error("Unable to send SMS with : \n" +
 					     " - account : " + smsMessage.getAccount() + "\n" +
 					     " - recipients : " + smsMessage.getPhoneNumbers() + "\n" +
-					     " - content : " + smsMessage.getContent() + "\n",
-					     e);
+					     " - content : " + smsMessage.getContent() + "\n" + e.getMessage(),
+					     e.getCause());
+				warnSenderMessageInvalid(smsMessage, e);
 			}
 		} else {
 			logger.warn("Unable to send SMS with : \n" +
 				    " - account : " + smsMessage.getAccount() + "\n" +
 				    " - recipients : " + smsMessage.getPhoneNumbers() + "\n" +
 				    " - content : " + smsMessage.getContent() + "\n" +
-				    "Wrong password.");
+				    "Invalid password.");
+			warnSenderMessageInvalid(smsMessage, new SmsSenderException("ERROR.INVALID.PASSWORD"));
 		}
 	}
+
+	private void warnSenderMessageInvalid(SmsMessage msg, SmsSenderException exception) {
+		messageRetriever.warnSenderMessageInvalid(msg.getRawMessage(), exception);
+ 	}
 
 	private void useDefaultAccountIfNone(SmsMessage smsMessage) {
 		// if no account was defined in the message

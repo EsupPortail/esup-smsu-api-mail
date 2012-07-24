@@ -6,6 +6,9 @@ import java.util.List;
 public class SmsMessage {
 
 	private List<String> phoneNumbers;
+
+	// useful in case of errors, esp. to get the email "From:"
+	private RawMessage rawMessage;
 	
 	private String content;
 	
@@ -54,5 +57,12 @@ public class SmsMessage {
 		this.pwd = pwd;
 	}
 
+	public void setRawMessage(final RawMessage rawMessage) {
+		this.rawMessage = rawMessage;
+	}
+
+	public RawMessage getRawMessage() {
+		return rawMessage;
+	}
 	
 }
