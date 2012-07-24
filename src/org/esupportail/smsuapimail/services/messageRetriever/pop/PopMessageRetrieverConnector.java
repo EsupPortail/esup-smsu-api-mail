@@ -144,28 +144,12 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 			folder.open(Folder.READ_WRITE);
 			
 			// Get the message wrappers and process them
-			for (Message messageTmp : folder.getMessages()) {			
-				// this try catch block is here to allow best effort managment.
-				// An error on a single email does not perform a global error
-				try {
-
-					// only process message not marked as deleted
-					if (!messageTmp.isSet(Flags.Flag.DELETED)) {
-						// convert the email into MailToSmsMessage
-						final SmsMessage mailToSmsMessage = convertMessageToMailToSmsMessage(messageTmp);
-						messageToProcessList.add(mailToSmsMessage);
-					}
-					
-				} catch (MessagingException e) {
-					logger.error("Unable to manage email with subject : " + messageTmp.getSubject() + " due to MessagingException", e);
-				} catch (IOException e) {
-					logger.error("Unable to manage email with subject : " + messageTmp.getSubject() + " due to IOException", e);
-				} finally {
-					// whetever append mark delete the message
-					messageTmp.setFlag(Flags.Flag.DELETED, true);
-				}
+			for (Message email : folder.getMessages()) {			
+				SmsMessage mailToSmsMessage = mayConvertMessageToMailToSmsMessage(email);
+				if (mailToSmsMessage != null)
+					// An error on a single email does not perform a global error
+					messageToProcessList.add(mailToSmsMessage);
 			}
-
 			
 		} catch (MessagingException e) {
 			String s = "unable to get message (due to MessagingException) from server : " + popServerAdress;
@@ -197,6 +181,34 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 		}
 		
 		return messageToProcessList;
+	}
+
+	private SmsMessage mayConvertMessageToMailToSmsMessage(final Message email) {
+		try {
+			if (!email.isSet(Flags.Flag.DELETED)) {
+				return convertMessageToMailToSmsMessage(email);
+			}
+		} catch (MessagingException e) {
+			logger.error("Unable to manage email with subject : " + safeGetSubject(email) + " due to MessagingException", e);
+		} catch (IOException e) {
+			logger.error("Unable to manage email with subject : " + safeGetSubject(email) + " due to IOException", e);
+		} finally {
+			try {
+				// whetever happen mark delete the message
+				email.setFlag(Flags.Flag.DELETED, true);
+			} catch (MessagingException e) {
+				logger.error("unable to to mark message deleted", e);
+			}
+		}
+		return null;
+	}
+
+	private String safeGetSubject(Message email) {
+		try {
+			return email.getSubject();
+		} catch (MessagingException e) {
+			return "";
+		}
 	}
 	
 	/**
