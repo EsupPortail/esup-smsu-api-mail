@@ -262,42 +262,47 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 	 * @throws IOException
 	 * @throws MessagingException
 	 */
-	private String getTextFromMessage(final Message email) throws IOException, MessagingException {
-		
-		final StringBuilder retVal = new StringBuilder(300);
-		
-		Part messagePart = email;
-		final Object messageContent = messagePart.getContent();
-		
-		if (messageContent instanceof Multipart) {
-			messagePart = ((Multipart) messageContent).getBodyPart(0);
-		}
-		
+	private String getTextFromMessage(final Message email) throws IOException, MessagingException {			
+		Part messagePart = getFirstBodyPart(email);
 		String contentType = messagePart.getContentType();
 		
 		// only accept plain text message
 		if (contentType.contains(PLAIN_TEXT_CONTENT_TYPE)) {
-			final InputStream is = messagePart.getInputStream();
-			final BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-			String currentLine = reader.readLine();
-			while (currentLine != null) {
-				// this line is used to charset managment to prevent 
-				// pb with french accents
-				final String tmp = new String(currentLine.getBytes(), mailCharset);
-				retVal.append(tmp).append("\n");
-				currentLine = reader.readLine();
-			}
+			return getTextFromInputStream(messagePart.getInputStream());
 		} else {
 			String s = "Message with subject : " + email.getSubject() + 
 			    " rejected because it is not a plain/text email";
 			logger.error(s);
 			throw new MessagingException(s);
 		}
+	}
+
+	private Part getFirstBodyPart(Message email) throws IOException, MessagingException {
+		final Object messageContent = email.getContent();	
+		if (messageContent instanceof Multipart) {
+			return ((Multipart) messageContent).getBodyPart(0);
+		} else {
+			return email;
+		}	
+	}
+
+	private String getTextFromInputStream(InputStream is) throws IOException {
+		final BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+		String currentLine = reader.readLine();
+
+		final StringBuilder retVal = new StringBuilder(300);
 		
+		while (currentLine != null) {
+			// this line is used to charset managment to prevent 
+			// pb with french accents
+			final String tmp = new String(currentLine.getBytes(), mailCharset);
+			retVal.append(tmp).append("\n");
+			currentLine = reader.readLine();
+		}
+			
 		if (logger.isDebugEnabled()) {
 			logger.debug("Text extract from message is : \n" + retVal.toString());
 		}
-		
 		return retVal.toString();
 	}
 	
