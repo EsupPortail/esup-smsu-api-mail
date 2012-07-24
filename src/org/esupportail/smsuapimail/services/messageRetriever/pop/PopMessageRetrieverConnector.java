@@ -144,11 +144,7 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 			folder.open(Folder.READ_WRITE);
 			
 			// Get the message wrappers and process them
-			final Message[] msgs = folder.getMessages();
-			
-			for (int msgNum = 0; msgNum < msgs.length; msgNum++) {
-				final Message messageTmp = msgs[msgNum];
-				
+			for (Message messageTmp : folder.getMessages()) {			
 				// this try catch block is here to allow best effort managment.
 				// An error on a single email does not perform a global error
 				try {
