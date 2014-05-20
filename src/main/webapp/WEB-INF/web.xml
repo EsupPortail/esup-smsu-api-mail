@@ -39,7 +39,7 @@
 	
 	<listener>
 		<listener-class>
-			org.esupportail.smsuapimail.business.context.SmsuApiMailServletContextListener
+			org.springframework.web.context.request.RequestContextListener
 		</listener-class>
 	</listener>
 	
