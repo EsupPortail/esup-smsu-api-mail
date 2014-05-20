@@ -23,9 +23,6 @@
 	</bean>
 	
 	<bean id="smsSenderWsImpl"
-		class="org.esupportail.smsuapimail.services.smsSender.ISmsSender">
-		<property name="fileName" value="${smsuapimail.ws.messageIdfileName}" />
-		<property name="senderId" value="${smsuapimail.ws.senderId}" />
-	</bean>
+		class="org.esupportail.smsuapimail.services.smsSender.ISmsSender" />
 	
 </beans>
