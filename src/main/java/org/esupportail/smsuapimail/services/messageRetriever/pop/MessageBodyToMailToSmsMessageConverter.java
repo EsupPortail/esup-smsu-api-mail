@@ -1,7 +1,5 @@
 package org.esupportail.smsuapimail.services.messageRetriever.pop;
 
-import java.text.MessageFormat;
-import java.text.ParsePosition;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;

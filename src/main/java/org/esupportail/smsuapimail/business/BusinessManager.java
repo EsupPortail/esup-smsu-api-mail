@@ -8,7 +8,6 @@ import org.esupportail.commons.services.logging.LoggerImpl;
 import org.esupportail.commons.utils.Assert;
 import org.esupportail.smsuapimail.domain.beans.SmsMessage;
 import org.esupportail.smsuapimail.exceptions.SmsSenderException;
-import org.esupportail.smsuapimail.services.messageRetriever.IMessageRetrieverConnector;
 import org.esupportail.smsuapimail.services.messageRetriever.MessageRetriever;
 import org.esupportail.smsuapimail.services.smsSender.ISmsSender;
 import org.springframework.beans.factory.InitializingBean;

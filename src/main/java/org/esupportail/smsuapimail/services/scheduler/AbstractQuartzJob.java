@@ -2,7 +2,6 @@ package org.esupportail.smsuapimail.services.scheduler;
 
 import org.esupportail.commons.services.logging.Logger;
 import org.esupportail.commons.services.logging.LoggerImpl;
-import org.esupportail.smsuapimail.business.context.ApplicationContextUtils;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
@@ -89,31 +88,14 @@ public abstract class AbstractQuartzJob extends QuartzJobBean implements Statefu
         final JobDataMap jobDataMap = jobDetail.getJobDataMap();
 
         try {
-        	ApplicationContextUtils.initApplicationContext();
-             // Open session & transaction (esup commons way)
-        	
-        	// no database in this application
-        	// DatabaseUtils.open();
-        	// DatabaseUtils.begin();
-
-        	// do the job
         	executeJob(applicationContext, jobDataMap);
-        	// no database in this application
-        	// DatabaseUtils.commit();
- 
         } catch (Throwable t) {
-        	// no database in this application
-        	// DatabaseUtils.rollback();
-
         	logger.error("An exception occurred during the execute internal ", t);
             if (exceptionHandler != null) {
                 exceptionHandler.process("Abstract Quartz job", t);
             } else {
                 throw new UnsupportedOperationException("The exceptionHander has to be not null");
             }
-        } finally {
-        	// no database in this application
-        	//DatabaseUtils.close();
         }
 	}
 	

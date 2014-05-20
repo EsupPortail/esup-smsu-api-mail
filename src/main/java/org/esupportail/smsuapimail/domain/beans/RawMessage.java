@@ -1,7 +1,6 @@
 package org.esupportail.smsuapimail.domain.beans;
 
 import java.io.IOException;
-import java.util.List;
 
 import javax.mail.Address;
 import javax.mail.Message;

@@ -15,7 +15,6 @@ import org.esupportail.smsuapimail.services.messageRetriever.pop.PopMessageRetri
 
 /**
  * Servlet used only during test.
- * @author PRQD8824
  *
  */
 public class TestServlet extends HttpServlet {
