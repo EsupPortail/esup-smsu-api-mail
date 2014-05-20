@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.esupportail.commons.services.i18n.I18nService;
 
+@SuppressWarnings("serial")
 public class ParsingMessageBodyException extends I18nException {
 
 	private String i18nKey;
@@ -27,7 +28,7 @@ public class ParsingMessageBodyException extends I18nException {
 	}
 
 	public String toI18nString(I18nService i18nService) {
-		return i18nService.getString(i18nKey, params);
+		return i18nService.getString(i18nKey, (Object[]) params);
 	}
 
 	static public class MissingMandatoryTag extends ParsingMessageBodyException {

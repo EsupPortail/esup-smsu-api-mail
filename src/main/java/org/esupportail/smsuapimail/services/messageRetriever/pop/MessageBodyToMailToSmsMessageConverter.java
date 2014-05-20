@@ -133,7 +133,7 @@ public class MessageBodyToMailToSmsMessageConverter implements InitializingBean 
 
 	private Set<String> nonEmptyTags() {
 		String[] l = { pwdTag, recipientsTag, contentTag };
-		return new HashSet(Arrays.asList(l));
+		return new HashSet<String>(Arrays.asList(l));
 	}
 
 	private Map<String, String> tag2nullValue() {
@@ -300,6 +300,7 @@ public class MessageBodyToMailToSmsMessageConverter implements InitializingBean 
 		return sb == null ? "" : sb.toString();
 	}
 
+	@SuppressWarnings("unused")
 	private void tests() {
 		String test1 =
 			"paSSwd=xxx\n" +

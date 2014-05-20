@@ -2,6 +2,7 @@ package org.esupportail.smsuapimail.exceptions;
 
 import org.esupportail.commons.services.i18n.I18nService;
 
+@SuppressWarnings("serial")
 abstract public class I18nException extends Exception {
 
 	abstract public String toI18nString(I18nService i18nService);
