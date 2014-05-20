@@ -1,18 +1,18 @@
 <?xml version="1.0"?>
 
-<!-- 
-	/webapp/WEB-INF/web.xml
-	The main configuration file of the application for servlet installations.
--->
-
-<web-app version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee"
+<web-app metadata-complete="true" version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+	<!-- disable "servlet api 3.0 classpath scanning" otherwise dead slow startup -->
+	<!-- metadata-complete="true" above is also needed -->
+	<!-- http://jira.codehaus.org/browse/JETTY-1503 -->
+	<absolute-ordering />
+
 	<display-name>esup-smsuapimail</display-name>
 
 	<context-param>
 		<param-name>log4jConfigLocation</param-name>
-		<param-value>classpath:log4j.properties</param-value>
+		<param-value>classpath:properties/logging/log4j.properties</param-value>
 	</context-param>
 
 	<context-param>
