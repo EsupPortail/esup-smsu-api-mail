@@ -13,27 +13,17 @@ import java.util.List;
 
 import org.esupportail.commons.services.logging.Logger;
 import org.esupportail.commons.services.logging.LoggerImpl;
+import org.esupportail.smsuapi.services.client.HttpRequestSmsuapiWS;
+import org.esupportail.smsuapi.services.client.SmsuapiWSException;
 import org.esupportail.smsuapimail.domain.beans.SmsMessage;
-import org.esupportail.smsuapimail.exceptions.InsufficientQuotaException;
 import org.esupportail.smsuapimail.exceptions.SmsSenderException;
-import org.esupportail.smsuapimail.exceptions.UnknownIdentifierApplicationException;
+import org.springframework.beans.factory.annotation.Autowired;
 
-/**
- * 
- * @author prqd8824
- *
- */
 public class ISmsSender {
 
-	/**
-	 * A logger.
-	 */
 	private final Logger logger = new LoggerImpl(getClass());
-	
-	/**
-	 * WS implementation bean.
-	 */
-	private ISendSms sendSms;
+
+	@Autowired private HttpRequestSmsuapiWS ws;
 
 	/**
 	 * a file to save and initialize the message ID
@@ -50,17 +40,6 @@ public class ISmsSender {
 	 * Sender id sent to the back office.
 	 */
 	private Integer senderId;
-	
-	/**
-	 * Group sender id sent to the back office.
-	 */
-	private Integer groupSenderId;
-	
-	/**
-	 * Service id sent to the back office.
-	 */
-	private Integer serviceId;
-	
 
 	/**
 	 * Constructor
@@ -107,12 +86,10 @@ public class ISmsSender {
 					     " - Account label : " + accountLabel);
 			}
 			
-			sendSms.mayCreateAccountCheckQuotaOk(nbSmsToSend, accountLabel);
+			ws.mayCreateAccountCheckQuotaOk(accountLabel, nbSmsToSend);
 			
-		} catch (UnknownIdentifierApplicationException e) {
-			throw new SmsSenderException("ERROR.BACK.OFFICE.UNKNOWN.IDENTIFIER.APPLICATION", e);
-		} catch (InsufficientQuotaException e) {
-			throw new SmsSenderException("ERROR.BACK.OFFICE.INSUFFICIENT.QUOTA", e);
+		} catch (SmsuapiWSException e) {
+			throw new SmsSenderException("ERROR.BACK.OFFICE", e);
 		} catch (java.lang.reflect.UndeclaredThrowableException e) {
 			throw new SmsSenderException("ERROR.BACK.OFFICE", e.getCause());
 		}
@@ -130,14 +107,12 @@ public class ISmsSender {
 			logger.debug("Sending request sendSMS to back office with parameters : \n" + 
 				     " - Message id : " + messageId + "\n" + 
 				     " - Sender id : " + senderId + "\n" + 
-				     " - Group sender id : " + groupSenderId + "\n" + 
-				     " - Service id : " + serviceId + "\n" + 
 				     " - Phone number : " + phoneNumber + "\n" + 
 				     " - Account label : " + accountLabel + "\n" + 
 				     " - content : " + content);
 		}
 		
-		sendSms.sendSMS(messageId, senderId, groupSenderId, serviceId, phoneNumber, accountLabel, content);
+		ws.sendSms(messageId, phoneNumber, content, accountLabel, senderId);
 	}
 	
 	/**
@@ -156,16 +131,6 @@ public class ISmsSender {
 		}
 	}
 	
-	
-	/**
-	 * Standard setter used by Spring.
-	 * @param sendSms
-	 */
-	public void setSendSms(final ISendSms sendSms) {
-		this.sendSms = sendSms;
-	}
-
-
 	/**
 	 * Standard setter used by Spring.
 	 * @param senderId
@@ -174,24 +139,6 @@ public class ISmsSender {
 		this.senderId = senderId;
 	}
 
-
-	/**
-	 * Standard setter used by Spring.
-	 * @param groupSenderId
-	 */
-	public void setGroupSenderId(final Integer groupSenderId) {
-		this.groupSenderId = groupSenderId;
-	}
-
-
-	/**
-	 * Standard setter used by Spring.
-	 * @param serviceId
-	 */
-	public void setServiceId(final Integer serviceId) {
-		this.serviceId = serviceId;
-	}
-	
 	/**
 	 * Standard setter used by Spring.
 	 * @param fileName
