@@ -4,8 +4,10 @@ import java.util.List;
 
 import org.esupportail.commons.services.logging.Logger;
 import org.esupportail.commons.services.logging.LoggerImpl;
+import org.esupportail.smsuapi.exceptions.InsufficientQuotaException;
 import org.esupportail.smsuapi.services.client.HttpRequestSmsuapiWS;
-import org.esupportail.smsuapi.services.client.SmsuapiWSException;
+import org.esupportail.smsuapi.services.client.SmsuapiWS;
+import org.esupportail.smsuapi.utils.HttpException;
 import org.esupportail.smsuapimail.domain.beans.SmsMessage;
 import org.esupportail.smsuapimail.exceptions.SmsSenderException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,8 +42,16 @@ public class ISmsSender {
 		
 		final int nbSmsToSend = phoneNumbers.size();
 		
-		checkQuota(nbSmsToSend, accountLabel);
-		sendMessage(phoneNumbers, message, accountLabel);
+		try {
+			checkQuota(nbSmsToSend, accountLabel);
+			sendMessage(phoneNumbers, message, accountLabel);
+		} catch (SmsuapiWS.AuthenticationFailedException e) {
+			throw new SmsSenderException("ERROR.BACK.OFFICE.UNKNOWN.IDENTIFIER.APPLICATION", e);
+		} catch (InsufficientQuotaException e) {
+			throw new SmsSenderException("ERROR.BACK.OFFICE.INSUFFICIENT.QUOTA", e);
+		} catch (HttpException e) {
+			throw new SmsSenderException("ERROR.BACK.OFFICE", e);
+		}
 	}
 	
 	
@@ -63,10 +73,12 @@ public class ISmsSender {
 			
 			ws.mayCreateAccountCheckQuotaOk(accountLabel, nbSmsToSend);
 			
-		} catch (SmsuapiWSException e) {
+		} catch (SmsuapiWS.AuthenticationFailedException e) {
+			throw new SmsSenderException("ERROR.BACK.OFFICE.UNKNOWN.IDENTIFIER.APPLICATION", e);
+		} catch (InsufficientQuotaException e) {
+			throw new SmsSenderException("ERROR.BACK.OFFICE.INSUFFICIENT.QUOTA", e);
+		} catch (HttpException e) {
 			throw new SmsSenderException("ERROR.BACK.OFFICE", e);
-		} catch (java.lang.reflect.UndeclaredThrowableException e) {
-			throw new SmsSenderException("ERROR.BACK.OFFICE", e.getCause());
 		}
 	}
 	
@@ -75,8 +87,10 @@ public class ISmsSender {
 	 * @param phoneNumbers
 	 * @param content
 	 * @param accountLabel
+	 * @throws InsufficientQuotaException 
+	 * @throws SmsuapiWSException 
 	 */
-	private void sendMessage(final List<String> phoneNumbers, final String content, final String accountLabel) {
+	private void sendMessage(final List<String> phoneNumbers, final String content, final String accountLabel) throws HttpException, InsufficientQuotaException {
 		
 		if (logger.isDebugEnabled()) {
 			logger.debug("Sending request sendSMS to back office with parameters : \n" + 
