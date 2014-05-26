@@ -63,10 +63,7 @@ public class ISmsSender {
 		checkQuota(nbSmsToSend, accountLabel);
 		messageId ++;
 		saveMessageId();
-		for (String phoneNumber : phoneNumbers) {
-			sendMessage(phoneNumber, message, accountLabel);
-		}
-
+		sendMessage(phoneNumbers, message, accountLabel);
 	}
 	
 	
@@ -97,22 +94,22 @@ public class ISmsSender {
 	
 	/**
 	 * Send the message to the back office.
-	 * @param phoneNumber
+	 * @param phoneNumbers
 	 * @param content
 	 * @param accountLabel
 	 */
-	private void sendMessage(final String phoneNumber, final String content, final String accountLabel) {
+	private void sendMessage(final List<String> phoneNumbers, final String content, final String accountLabel) {
 		
 		if (logger.isDebugEnabled()) {
 			logger.debug("Sending request sendSMS to back office with parameters : \n" + 
 				     " - Message id : " + messageId + "\n" + 
 				     " - Sender id : " + senderId + "\n" + 
-				     " - Phone number : " + phoneNumber + "\n" + 
+				     " - Phone number : " + phoneNumbers + "\n" + 
 				     " - Account label : " + accountLabel + "\n" + 
 				     " - content : " + content);
 		}
 		
-		ws.sendSms(messageId, phoneNumber, content, accountLabel, senderId);
+		ws.sendSms(messageId, phoneNumbers, content, accountLabel, senderId);
 	}
 	
 	/**
