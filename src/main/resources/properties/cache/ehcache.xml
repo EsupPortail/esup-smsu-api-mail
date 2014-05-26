@@ -6,14 +6,6 @@
     	from /properties/cache/cache.xml.
     -->
 
-    <cache 
-    	name="org.esupportail.commons.services.exceptionHandling.CachingEmailExceptionServiceImpl"
-    	maxElementsInMemory="1000" 
-    	eternal="false" 
-    	timeToIdleSeconds="900"
-    	timeToLiveSeconds="900" 
-    	/>
-
     <defaultCache
             maxElementsInMemory="10000"
             eternal="false"
