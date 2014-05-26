@@ -27,6 +27,12 @@ public class RawMessage {
 	private String subject;
 	private byte[] content;
 	
+	public RawMessage(Address from, String subject, byte[] content) {
+		this.from = from;
+		this.subject = subject;
+		this.content = content;
+	}
+	
 	public RawMessage(Message msg) throws MessagingException, IOException {
 		from = msg.getFrom()[0];
 		subject = msg.getSubject();
