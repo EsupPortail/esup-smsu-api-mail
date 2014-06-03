@@ -83,11 +83,6 @@
 		</dependency>
 		<dependency>
 		  <groupId>org.springframework</groupId>
-		  <artifactId>spring-orm</artifactId>
-		  <version>${spring-version}</version>
-		</dependency>
-		<dependency>
-		  <groupId>org.springframework</groupId>
 		  <artifactId>spring-context-support</artifactId>
 		  <version>${spring-version}</version>
 		</dependency>
@@ -97,48 +92,16 @@
 		  <version>${spring-version}</version>
 		</dependency>
 
-
 		<dependency>
 		  <groupId>org.esupportail</groupId>
-		  <artifactId>esup-smsu-api</artifactId>
-		  <version>2.0.0-SNAPSHOT</version>
-		  <type>jar</type>
-		</dependency>
-
-		<dependency>
-		  <groupId>org.esupportail</groupId>
-		  <artifactId>esup-commons2-hibernate</artifactId>
+		  <artifactId>esup-commons2-core</artifactId>
 		  <version>${esup-commons-version}</version>
-		<exclusions>
-		  <!-- remove unneeded -->
-		  <exclusion>
-		    <groupId>postgresql</groupId>
-		    <artifactId>postgresql</artifactId>
-		  </exclusion>
-		  <exclusion>
-		    <groupId>hsqldb</groupId>
-		    <artifactId>hsqldb</artifactId>
-		  </exclusion>
-		</exclusions>
-		</dependency>
-		<dependency>
-		  <groupId>org.esupportail</groupId>
-		  <artifactId>esup-commons2-web</artifactId>
-		  <version>${esup-commons-version}</version>
-		<exclusions>
-		  <!-- spring-asm is no more in spring 3.2.x -->
-		  <exclusion>
-		    <groupId>org.springframework</groupId>
-		    <artifactId>spring-asm</artifactId>
-		  </exclusion>
-		</exclusions>
 		</dependency>
 
 		<dependency>
 		  <groupId>org.esupportail</groupId>
 		  <artifactId>esup-smsu-api</artifactId>
 		  <version>2.0.0-SNAPSHOT</version>
-		  <type>jar</type>
 		</dependency>
 		
 		<dependency>
@@ -147,13 +110,7 @@
                   <version>1.5.2</version>
                 </dependency>
 
-		<dependency>
-		  <groupId>junit</groupId>
-		  <artifactId>junit</artifactId>
-		  <version>4.10</version>
-		  <scope>test</scope>
-		</dependency>
-
+		<!-- for smsuapi WS -->
 		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-mapper-asl</artifactId>
