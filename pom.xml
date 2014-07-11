@@ -92,6 +92,12 @@
 		  <artifactId>spring-web</artifactId>
 		  <version>${spring-version}</version>
 		</dependency>
+		<!-- for autowired fields? -->
+		<dependency>
+		  <groupId>org.springframework</groupId>
+		  <artifactId>spring-tx</artifactId>
+		  <version>${spring-version}</version>
+		</dependency>
 
 		<dependency>
 		  <groupId>org.esupportail</groupId>
