@@ -100,7 +100,7 @@
 		</dependency>
 
 		<dependency>
-		  <groupId>org.esupportail</groupId>
+		  <groupId>org.esup-portail</groupId>
 		  <artifactId>esup-smsu-api</artifactId>
 		  <version>2.0.0-RC2</version>
 		</dependency>
