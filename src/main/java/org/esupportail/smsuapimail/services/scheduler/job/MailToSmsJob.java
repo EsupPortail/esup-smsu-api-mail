@@ -1,7 +1,6 @@
 package org.esupportail.smsuapimail.services.scheduler.job;
 
-import org.esupportail.commons.services.logging.Logger;
-import org.esupportail.commons.services.logging.LoggerImpl;
+import org.apache.log4j.Logger;
 import org.esupportail.smsuapimail.business.BusinessManager;
 import org.esupportail.smsuapimail.services.scheduler.AbstractQuartzJob;
 import org.quartz.JobDataMap;
@@ -12,7 +11,7 @@ public class MailToSmsJob extends AbstractQuartzJob {
 	/**
 	 * A logger.
 	 */
-	private final Logger logger = new LoggerImpl(getClass());
+	private final Logger logger = Logger.getLogger(getClass());
 	
 	private static final String BUSINESS_MANAGER_BEAN_NAME = "businessManager";
 	

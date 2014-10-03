@@ -2,8 +2,7 @@ package org.esupportail.smsuapimail.services.smsSender;
 
 import java.util.List;
 
-import org.esupportail.commons.services.logging.Logger;
-import org.esupportail.commons.services.logging.LoggerImpl;
+import org.apache.log4j.Logger;
 import org.esupportail.smsuapi.exceptions.InsufficientQuotaException;
 import org.esupportail.smsuapi.services.client.HttpRequestSmsuapiWS;
 import org.esupportail.smsuapi.services.client.SmsuapiWS;
@@ -14,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class ISmsSender {
 
-	private final Logger logger = new LoggerImpl(getClass());
+	private final Logger logger = Logger.getLogger(getClass());
 
 	@Autowired private HttpRequestSmsuapiWS ws;
 	

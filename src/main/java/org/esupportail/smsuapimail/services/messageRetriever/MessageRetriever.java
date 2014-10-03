@@ -6,8 +6,7 @@ import java.util.LinkedList;
 import javax.mail.internet.InternetAddress;
 
 import org.esupportail.commons.services.i18n.I18nService;
-import org.esupportail.commons.services.logging.Logger;
-import org.esupportail.commons.services.logging.LoggerImpl;
+import org.apache.log4j.Logger;
 import org.esupportail.commons.services.smtp.SmtpService;
 import org.esupportail.commons.utils.Assert;
 import org.esupportail.smsuapimail.domain.beans.RawMessage;
@@ -24,7 +23,7 @@ public class MessageRetriever implements InitializingBean {
 	/**
 	 * A logger.
 	 */
-	private final Logger logger = new LoggerImpl(getClass());
+	private final Logger logger = Logger.getLogger(getClass());
 	
 	/**
 	 * Charset supported in email.

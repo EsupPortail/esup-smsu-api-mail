@@ -11,8 +11,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
-import org.esupportail.commons.services.logging.Logger;
-import org.esupportail.commons.services.logging.LoggerImpl;
+import org.apache.log4j.Logger;
 import org.esupportail.smsuapimail.domain.beans.SmsMessage;
 import org.esupportail.smsuapimail.exceptions.ParsingMessageBodyException;
 import org.springframework.beans.factory.InitializingBean;
@@ -26,7 +25,7 @@ public class MessageBodyToMailToSmsMessageConverter implements InitializingBean 
 	/**
 	 * A logger.
 	 */
-	private final Logger logger = new LoggerImpl(getClass());
+	private final Logger logger = Logger.getLogger(getClass());
 	
 	/**
 	 * the regular expression used to find tags

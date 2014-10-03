@@ -13,8 +13,7 @@ import javax.mail.NoSuchProviderException;
 import javax.mail.Session;
 import javax.mail.Store;
 
-import org.esupportail.commons.services.logging.Logger;
-import org.esupportail.commons.services.logging.LoggerImpl;
+import org.apache.log4j.Logger;
 import org.esupportail.smsuapimail.domain.beans.RawMessage;
 import org.esupportail.smsuapimail.exceptions.MessageRetrieverConnectorException;
 import org.esupportail.smsuapimail.services.messageRetriever.IMessageRetrieverConnector;
@@ -30,7 +29,7 @@ public class PopMessageRetrieverConnector implements IMessageRetrieverConnector 
 	/**
 	 * A logger.
 	 */
-	private final Logger logger = new LoggerImpl(getClass());
+	private final Logger logger = Logger.getLogger(getClass());
 	
 	/**
 	 * The store type on the server.
